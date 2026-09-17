@@ -143,3 +143,47 @@ export const NOTIFICATIONS = [
   { date: "10 Sep 2026", title: "Placement registration - 2026 batch", body: "Students appearing for campus placements must complete profile registration on the placement portal before 22 September. Contact the placement cell for clarifications." },
   { date: "02 Sep 2026", title: "Call for papers - Department Technical Journal", body: "Submissions are invited from UG and PG students. Last date for full paper submission is 15 October." }
 ];
+export const FAQ_ITEMS = [
+  { q: 'Who can join SAIT?', a: 'All students currently enrolled in the B.Tech Information Technology programme at SOE, CUSAT are members of SAIT by default. There is no separate membership fee.' },
+  { q: 'How do I join a sub-team?', a: 'Sub-team recruitment happens at the beginning of every semester. Watch the notices page or approach the lead of the team you are interested in directly.' },
+  { q: 'Are SAIT events open to other colleges?', a: 'Flagship events like HackIT and CodeFest are open to students from other colleges in Kerala. Workshops and talks are usually limited to CUSAT students.' },
+  { q: 'How is the activity logger verified?', a: 'Activities submitted through the logger are verified by the staff coordinator and the relevant sub-team lead. Verification usually takes 3-5 working days.' },
+  { q: 'Do I need to attend every event?', a: 'No. SAIT events are voluntary. Attend what interests you — the association exists to support your interests, not to add obligations.' },
+  { q: 'How can I propose an event?', a: 'Write to sait@cusat.ac.in with a short description and the sub-team you think should run it. The executive committee reviews proposals once a month.' },
+  { q: 'Is there a membership fee?', a: 'No. SAIT is funded by the department and event sponsorships. There is no membership fee for students at any point.' },
+  { q: 'Can alumni contribute?', a: 'Yes. Alumni can mentor current students, speak at events, or refer graduates to their companies. Write to the association to get involved.' },
+]
+
+export const GALLERY_ITEMS = [
+  { id: 1, title: 'HackIT 2025 - judging round', tag: 'Hackathon', size: 'large' },
+  { id: 2, title: 'InnoVIT project expo', tag: 'Expo' },
+  { id: 3, title: 'Workshop: Kubernetes basics', tag: 'Workshop' },
+  { id: 4, title: 'Annual Day 2026', tag: 'Cultural' },
+  { id: 5, title: 'CodeFest finals', tag: 'Competition' },
+  { id: 6, title: 'Orientation week', tag: 'Welcome' },
+  { id: 7, title: 'TechTalk: careers in product', tag: 'Talk' },
+  { id: 8, title: 'Farewell 2025 batch', tag: 'Farewell' },
+  { id: 9, title: 'New lab inauguration', tag: 'Campus', size: 'large' },
+]
+
+export const BLOG_POSTS = [
+  { date: '12 Sep 2026', title: 'HackIT 2026 problem statements released', tag: 'Events', excerpt: 'The four tracks cover logistics, health, sustainability and open innovation. Teams can register until 28 September.', author: 'SAIT Media' },
+  { date: '05 Sep 2026', title: 'Placement season 2026: what changed this year', tag: 'Placements', excerpt: 'The department is introducing a structured mock interview cycle for third years ahead of the main placement season.', author: 'Placement Cell' },
+  { date: '28 Aug 2026', title: 'Interview: alumni in Bangalore on the college-to-work transition', tag: 'Alumni', excerpt: 'Three graduates from batches 2016-2019 discuss what the first year after college looked like for them.', author: 'SAIT Content' },
+  { date: '15 Aug 2026', title: 'InnoVIT 2026 winners announced', tag: 'Events', excerpt: 'Six projects were awarded across categories. Here is the full list with brief descriptions of each.', author: 'SAIT Media' },
+  { date: '01 Aug 2026', title: 'New lab equipment arrives at the IT block', tag: 'Campus', excerpt: 'A new GPU server and 20 workstations are available for student project use from this semester onward.', author: 'Department Office' },
+  { date: '22 Jul 2026', title: 'Reflections on the first semester of SAIT 2026-27', tag: 'Association', excerpt: 'The new executive committee shares what they set out to do this year and what has already changed.', author: 'Executive Committee' },
+]
+
+export const CONTACT = {
+  email: 'sait@cusat.ac.in',
+  altEmail: 'office.it@cusat.ac.in',
+  phone: '+91 484 2577 xxx',
+  hours: 'Mon-Fri, 09:30 - 16:30',
+  address: {
+    line1: 'Division of Information Technology',
+    line2: 'School of Engineering, CUSAT',
+    line3: 'South Kalamassery, Kochi',
+    line4: 'Kerala - 682 022',
+  },
+}

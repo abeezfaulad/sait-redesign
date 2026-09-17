@@ -4,6 +4,7 @@ import {
   Home, About, People, Events, Placements,
   Alumni, Achievements, ActivityLogger, Notifications,
 } from './sections.jsx'
+import { FAQ, Gallery, Blog, Contact } from './extras.jsx'
 import { ToastProvider, ShortcutHelp, Kbd } from './ui.jsx'
 import { useHotkeys, useLocalStorage } from './hooks.js'
 import CommandPalette from './CommandPalette.jsx'
@@ -24,7 +25,8 @@ function Shell() {
   useEffect(() => {
     const fromHash = () => {
       const h = window.location.hash.replace('#', '')
-      if (NAV.some((n) => n.id === h) || h === 'notifications') setPage(h || 'home')
+      const known = [...NAV.map((n) => n.id), 'gallery', 'blog', 'faq', 'contact', 'notifications']
+      if (known.includes(h)) setPage(h || 'home')
     }
     fromHash()
     window.addEventListener('hashchange', fromHash)
@@ -52,48 +54,34 @@ function Shell() {
     pg('placements', 'Placements & careers', 'jobs recruiters packages')
     pg('alumni', 'Alumni', 'graduates batches')
     pg('achievements', 'Achievements', 'hall of fame awards')
+    pg('gallery', 'Gallery', 'photos images')
+    pg('blog', 'Newsroom', 'updates posts blog')
     pg('logger', 'Activity logger', 'submit record points')
+    pg('faq', 'FAQ', 'questions help')
+    pg('contact', 'Contact', 'email phone reach')
     pg('notifications', 'Notices & announcements', 'updates reminders')
 
     UPCOMING_EVENTS.forEach((e) => list.push({
-      id: 'event-' + e.title,
-      group: 'Events',
-      label: e.title,
-      hint: e.date,
-      keywords: e.category + ' ' + e.venue,
-      run: () => navigate('events'),
+      id: 'event-' + e.title, group: 'Events', label: e.title, hint: e.date,
+      keywords: e.category + ' ' + e.venue, run: () => navigate('events'),
     }))
 
     EXEC.slice(0, 6).forEach((p) => list.push({
-      id: 'person-' + p.name,
-      group: 'People',
-      label: p.name,
-      hint: p.role,
-      keywords: 'committee executive',
-      run: () => navigate('people'),
+      id: 'person-' + p.name, group: 'People', label: p.name, hint: p.role,
+      keywords: 'committee executive', run: () => navigate('people'),
     }))
 
     ALUMNI.slice(0, 4).forEach((a) => list.push({
-      id: 'alum-' + a.name,
-      group: 'Alumni',
-      label: a.name,
-      hint: `Class of ${a.year}`,
-      keywords: a.role,
-      run: () => navigate('alumni'),
+      id: 'alum-' + a.name, group: 'Alumni', label: a.name, hint: `Class of ${a.year}`,
+      keywords: a.role, run: () => navigate('alumni'),
     }))
 
     list.push({
-      id: 'action-logs',
-      group: 'Actions',
-      label: 'Open activity logger',
-      hint: 'Action',
+      id: 'action-logs', group: 'Actions', label: 'Open activity logger', hint: 'Action',
       run: () => navigate('logger'),
     })
     list.push({
-      id: 'action-help',
-      group: 'Actions',
-      label: 'Show keyboard shortcuts',
-      hint: '?',
+      id: 'action-help', group: 'Actions', label: 'Show keyboard shortcuts', hint: '?',
       run: () => setHelpOpen(true),
     })
 
@@ -105,10 +93,7 @@ function Shell() {
     '/': () => setPaletteOpen(true),
     '?': () => setHelpOpen(true),
     'escape': () => { setPaletteOpen(false); setHelpOpen(false) },
-    'g': () => {
-      setGPending(true)
-      setTimeout(() => setGPending(false), 900)
-    },
+    'g': () => { setGPending(true); setTimeout(() => setGPending(false), 900) },
     'h': () => { if (gPending) { navigate('home'); setGPending(false) } },
     'a': () => { if (gPending) { navigate('about'); setGPending(false) } },
     'p': () => { if (gPending) { navigate('people'); setGPending(false) } },
@@ -154,6 +139,10 @@ function Shell() {
             {NAV.map((n) => (
               <button key={n.id} data-active={page === n.id} onClick={() => navigate(n.id)}>{n.label}</button>
             ))}
+            <button data-active={page === 'gallery'} onClick={() => navigate('gallery')}>Gallery</button>
+            <button data-active={page === 'blog'} onClick={() => navigate('blog')}>News</button>
+            <button data-active={page === 'faq'} onClick={() => navigate('faq')}>FAQ</button>
+            <button data-active={page === 'contact'} onClick={() => navigate('contact')}>Contact</button>
             <button data-active={page === 'notifications'} onClick={() => navigate('notifications')} className="nav-notices">
               Notices
               {unreadNotices > 0 && <span className="badge">{unreadNotices}</span>}
@@ -173,7 +162,13 @@ function Shell() {
 
         {menuOpen && (
           <div className="container nav-mobile">
-            {[...NAV, { id: 'notifications', label: 'Notices' }].map((n) => (
+            {[...NAV,
+              { id: 'gallery', label: 'Gallery' },
+              { id: 'blog', label: 'News' },
+              { id: 'faq', label: 'FAQ' },
+              { id: 'contact', label: 'Contact' },
+              { id: 'notifications', label: 'Notices' },
+            ].map((n) => (
               <button key={n.id} data-active={page === n.id} onClick={() => navigate(n.id)}>{n.label}</button>
             ))}
           </div>
@@ -188,7 +183,11 @@ function Shell() {
         {page === 'placements' && <Placements />}
         {page === 'alumni' && <Alumni />}
         {page === 'achievements' && <Achievements />}
+        {page === 'gallery' && <Gallery />}
+        {page === 'blog' && <Blog />}
         {page === 'logger' && <ActivityLogger />}
+        {page === 'faq' && <FAQ />}
+        {page === 'contact' && <Contact />}
         {page === 'notifications' && <Notifications />}
       </main>
 
@@ -198,7 +197,7 @@ function Shell() {
             <div>
               <span className="label">Contact</span>
               <h3 style={{ marginTop: 14 }}>Students Association of Information Technology</h3>
-              <p style={{ color: 'var(--footer-text)', maxWidth: '38ch', margin: 0 }}>
+              <p style={{ color: 'var(--text-2)', maxWidth: '38ch', margin: 0 }}>
                 Division of Information Technology<br />
                 School of Engineering, CUSAT<br />
                 Kochi, Kerala — 682 022
@@ -213,6 +212,10 @@ function Shell() {
                 {NAV.map((n) => (
                   <a key={n.id} href={`#${n.id}`} onClick={(e) => { e.preventDefault(); navigate(n.id) }}>{n.label}</a>
                 ))}
+                <a href="#gallery" onClick={(e) => { e.preventDefault(); navigate('gallery') }}>Gallery</a>
+                <a href="#blog" onClick={(e) => { e.preventDefault(); navigate('blog') }}>News</a>
+                <a href="#faq" onClick={(e) => { e.preventDefault(); navigate('faq') }}>FAQ</a>
+                <a href="#contact" onClick={(e) => { e.preventDefault(); navigate('contact') }}>Contact</a>
                 <a href="#notifications" onClick={(e) => { e.preventDefault(); navigate('notifications') }}>Notices</a>
               </div>
             </div>

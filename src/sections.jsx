@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react'
 import { Section, ArrowLink, Initials, SubHead, Drawer, SearchInput, Empty, Kbd, useToast } from './ui.jsx'
 import { useLocalStorage, useQueryParam } from './hooks.js'
+import { useEventCountdown, useBookmarks, RegistrationModal } from './extras.jsx'
 import {
   STATS, QUICK_LINKS, FACULTY, EXEC, TEAMS,
   EVENT_CATEGORIES, UPCOMING_EVENTS, PAST_EVENTS,
@@ -10,9 +11,6 @@ import {
   NOTIFICATIONS,
 } from './data.js'
 
-/* ============================================================
-   HOME
-   ============================================================ */
 export function Home({ onNavigate, onOpenPalette }) {
   return (
     <>
@@ -66,9 +64,6 @@ export function Home({ onNavigate, onOpenPalette }) {
   )
 }
 
-/* ============================================================
-   ABOUT
-   ============================================================ */
 const RESOURCES = [
   { title: 'B.Tech IT curriculum — 2022 scheme', note: 'Full course structure, credits, and electives for all eight semesters.' },
   { title: 'Academic calendar, Odd Semester 2026', note: 'Term dates, holidays, internal exam windows, and result publication dates.' },
@@ -149,9 +144,6 @@ export function About() {
   )
 }
 
-/* ============================================================
-   PEOPLE
-   ============================================================ */
 export function People() {
   const [q, setQ] = useState('')
   const needle = q.trim().toLowerCase()
@@ -218,9 +210,6 @@ export function People() {
   )
 }
 
-/* ============================================================
-   EVENTS
-   ============================================================ */
 function eventDateParts(d) {
   const m = d.match(/(\d+)\s+([A-Za-z]+)\s+(\d+)/)
   if (!m) return null
@@ -228,9 +217,12 @@ function eventDateParts(d) {
 }
 
 export function Events() {
+  const toast = useToast()
   const [filter, setFilter] = useQueryParam('eventcat', 'All')
   const [view, setView] = useQueryParam('eventview', 'list')
   const [active, setActive] = useState(null)
+  const [registering, setRegistering] = useState(null)
+  const [bookmarks, setBookmarks] = useBookmarks()
 
   const upcoming = useMemo(
     () => (filter === 'All' ? UPCOMING_EVENTS : UPCOMING_EVENTS.filter((e) => e.category === filter)),
@@ -242,9 +234,51 @@ export function Events() {
     []
   )
 
+  const nextEvent = upcoming[0]
+  const countdown = useEventCountdown(nextEvent?.date || '')
+
+  function toggleBookmark(title) {
+    setBookmarks((prev) => prev.includes(title) ? prev.filter((x) => x !== title) : [...prev, title])
+  }
+
   return (
     <Section id="events" num="04" kicker="Events & activities" title="What's on, and what's already happened."
-      lede="Upcoming events list venue, time and registration details. The archive is organised by year and category.">
+      lede="Upcoming events list venue, time and registration details. Bookmark an event to save it for later.">
+
+      {nextEvent && countdown && !countdown.past && (
+        <div className="countdown-card">
+          <div className="countdown-label">
+            <span className="live-dot" aria-hidden="true" />
+            <span className="label">Next event</span>
+          </div>
+          <div className="countdown-title">{nextEvent.title}</div>
+          <div className="countdown-meta">{nextEvent.date} · {nextEvent.time} · {nextEvent.venue}</div>
+          <div className="countdown-grid">
+            <div className="countdown-cell">
+              <div className="countdown-value">{String(countdown.days).padStart(2, '0')}</div>
+              <div className="countdown-key">Days</div>
+            </div>
+            <div className="countdown-cell">
+              <div className="countdown-value">{String(countdown.hours).padStart(2, '0')}</div>
+              <div className="countdown-key">Hours</div>
+            </div>
+            <div className="countdown-cell">
+              <div className="countdown-value">{String(countdown.minutes).padStart(2, '0')}</div>
+              <div className="countdown-key">Minutes</div>
+            </div>
+            <div className="countdown-cell">
+              <div className="countdown-value">{String(countdown.seconds).padStart(2, '0')}</div>
+              <div className="countdown-key">Seconds</div>
+            </div>
+          </div>
+          <div className="countdown-actions">
+            <button className="btn" onClick={() => setRegistering(nextEvent)}>Register now</button>
+            <button className="btn ghost" onClick={() => toggleBookmark(nextEvent.title)}>
+              {bookmarks.includes(nextEvent.title) ? '★ Saved' : '☆ Save'}
+            </button>
+          </div>
+        </div>
+      )}
 
       <div className="toolbar">
         <div className="filters">
@@ -263,19 +297,33 @@ export function Events() {
       {view === 'list' && (
         <div className="row-list">
           {upcoming.length === 0 && <Empty>No upcoming events in this category.</Empty>}
-          {upcoming.map((e) => (
-            <button className="row row-btn" key={e.title} onClick={() => setActive({ ...e, kind: 'upcoming' })}>
-              <div>
-                <div className="row-date">{e.date}</div>
-                <div className="row-date" style={{ marginTop: 4, color: 'var(--text-3)' }}>{e.time}</div>
+          {upcoming.map((e) => {
+            const saved = bookmarks.includes(e.title)
+            return (
+              <div className="event-row" key={e.title}>
+                <button className="event-main" onClick={() => setActive({ ...e, kind: 'upcoming' })}>
+                  <div>
+                    <div className="row-date">{e.date}</div>
+                    <div className="row-date" style={{ marginTop: 4, color: 'var(--text-3)' }}>{e.time}</div>
+                  </div>
+                  <div>
+                    <div className="row-title">{e.title}</div>
+                    <div className="row-meta" style={{ marginTop: 8 }}>{e.venue} · {e.note}</div>
+                  </div>
+                </button>
+                <div className="event-side">
+                  <span className="tag accent">{e.category}</span>
+                  <button
+                    className="bookmark-btn"
+                    onClick={() => toggleBookmark(e.title)}
+                    aria-label={saved ? 'Remove bookmark' : 'Save event'}
+                  >
+                    {saved ? '★' : '☆'}
+                  </button>
+                </div>
               </div>
-              <div>
-                <div className="row-title">{e.title}</div>
-                <div className="row-meta" style={{ marginTop: 8 }}>{e.venue} · {e.note}</div>
-              </div>
-              <div className="row-meta"><span className="tag accent">{e.category}</span></div>
-            </button>
-          ))}
+            )
+          })}
         </div>
       )}
 
@@ -295,6 +343,19 @@ export function Events() {
               </button>
             )
           })}
+        </div>
+      )}
+
+      {bookmarks.length > 0 && (
+        <div style={{ marginTop: 40 }}>
+          <SubHead>Saved events ({bookmarks.length})</SubHead>
+          <div className="filters" style={{ marginBottom: 12 }}>
+            {bookmarks.map((title) => (
+              <button key={title} onClick={() => toggleBookmark(title)}>
+                {title} ×
+              </button>
+            ))}
+          </div>
         </div>
       )}
 
@@ -333,13 +394,29 @@ export function Events() {
         eyebrow={active ? (active.kind === 'upcoming' ? 'Upcoming event' : 'Past event') : ''}
         title={active?.title || ''}
       >
-        {active && <EventDetail event={active} />}
+        {active && (
+          <EventDetail
+            event={active}
+            onRegister={() => { setActive(null); setRegistering(active) }}
+          />
+        )}
       </Drawer>
+
+      <RegistrationModal
+        event={registering}
+        onClose={() => setRegistering(null)}
+        onConfirm={() => {
+          toast.push({
+            title: 'Registration confirmed',
+            body: `${registering?.title} · ${registering?.date}`,
+          })
+        }}
+      />
     </Section>
   )
 }
 
-function EventDetail({ event }) {
+function EventDetail({ event, onRegister }) {
   const toast = useToast()
   const isPast = event.kind === 'past'
   return (
@@ -382,15 +459,7 @@ function EventDetail({ event }) {
             </p>
           </div>
           <div className="detail-actions">
-            <button
-              className="btn"
-              onClick={() => toast.push({
-                title: 'Registration link copied',
-                body: 'This is a prototype — no real link exists.',
-              })}
-            >
-              Register
-            </button>
+            <button className="btn" onClick={onRegister}>Register</button>
             <button
               className="btn ghost"
               onClick={() => toast.push({
@@ -420,9 +489,6 @@ function EventDetail({ event }) {
   )
 }
 
-/* ============================================================
-   PLACEMENTS
-   ============================================================ */
 export function Placements() {
   const toast = useToast()
   return (
@@ -469,9 +535,6 @@ export function Placements() {
   )
 }
 
-/* ============================================================
-   ALUMNI
-   ============================================================ */
 export function Alumni() {
   const [q, setQ] = useState('')
   const [year, setYear] = useState('All')
@@ -523,9 +586,6 @@ export function Alumni() {
   )
 }
 
-/* ============================================================
-   ACHIEVEMENTS
-   ============================================================ */
 export function Achievements() {
   const [q, setQ] = useState('')
   const filtered = useMemo(() => {
@@ -573,9 +633,6 @@ export function Achievements() {
   )
 }
 
-/* ============================================================
-   ACTIVITY LOGGER
-   ============================================================ */
 export function ActivityLogger() {
   const toast = useToast()
   const [activities, setActivities] = useLocalStorage('sait.activities', SEED_ACTIVITIES)
@@ -650,6 +707,22 @@ export function ActivityLogger() {
     })
   }
 
+  function exportCsv() {
+    const rows = [
+      ['Date', 'Title', 'Type', 'Role', 'Status', 'Points', 'Submitted by'],
+      ...activities.map((a) => [a.date, a.title, typeLabel(a.type), a.role, a.status, a.points, a.who]),
+    ]
+    const csv = rows.map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n')
+    const blob = new Blob([csv], { type: 'text/csv' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `sait-activities-${new Date().toISOString().slice(0, 10)}.csv`
+    link.click()
+    URL.revokeObjectURL(url)
+    toast.push({ title: 'Exported to CSV', body: `${activities.length} activities downloaded` })
+  }
+
   return (
     <Section id="logger" num="08" kicker="Student activity logger" title="Record what you do outside class."
       lede="Submit hackathons, workshops, publications, internships and other activities. Verified entries appear on your profile and count towards the department leaderboard.">
@@ -699,14 +772,15 @@ export function ActivityLogger() {
               <button className="btn" type="submit">
                 {editingId ? 'Save changes' : 'Submit for verification'}
               </button>
-              <span className="form-hint">
-                <Kbd>Enter</Kbd> to submit
-              </span>
+              <span className="form-hint"><Kbd>Enter</Kbd> to submit</span>
             </div>
           </form>
         </div>
 
         <div>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 12 }}>
+            <button className="btn ghost" onClick={exportCsv}>Export CSV</button>
+          </div>
           <SubHead>Your dashboard</SubHead>
           <div className="stat-row" style={{ marginTop: 0, gridTemplateColumns: 'repeat(3, 1fr)' }}>
             <div className="stat">
@@ -818,9 +892,6 @@ function Leaderboard() {
   )
 }
 
-/* ============================================================
-   NOTIFICATIONS
-   ============================================================ */
 export function Notifications() {
   const [open, setOpen] = useState(0)
   const [read, setRead] = useLocalStorage('sait.notices.read', [])
@@ -828,9 +899,7 @@ export function Notifications() {
   function toggleRead(idx) {
     setRead((prev) => prev.includes(idx) ? prev.filter((x) => x !== idx) : [...prev, idx])
   }
-  function markAllRead() {
-    setRead(NOTIFICATIONS.map((_, i) => i))
-  }
+  function markAllRead() { setRead(NOTIFICATIONS.map((_, i) => i)) }
   function markAllUnread() { setRead([]) }
 
   const unread = NOTIFICATIONS.length - read.length
