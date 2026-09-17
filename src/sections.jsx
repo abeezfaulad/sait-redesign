@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react'
 import { Section, ArrowLink, Initials, SubHead, Drawer, SearchInput, Empty, Kbd, useToast } from './ui.jsx'
 import { useLocalStorage, useQueryParam } from './hooks.js'
-import { useEventCountdown, useBookmarks, RegistrationModal } from './extras.jsx'
+import { useEventCountdown, RegistrationModal } from './extras.jsx'
 import {
   STATS, QUICK_LINKS, FACULTY, EXEC, TEAMS,
   EVENT_CATEGORIES, UPCOMING_EVENTS, PAST_EVENTS,
@@ -11,6 +11,9 @@ import {
   NOTIFICATIONS,
 } from './data.js'
 
+/* ============================================================
+   HOME
+   ============================================================ */
 export function Home({ onNavigate, onOpenPalette }) {
   return (
     <>
@@ -64,6 +67,9 @@ export function Home({ onNavigate, onOpenPalette }) {
   )
 }
 
+/* ============================================================
+   ABOUT
+   ============================================================ */
 const RESOURCES = [
   { title: 'B.Tech IT curriculum — 2022 scheme', note: 'Full course structure, credits, and electives for all eight semesters.' },
   { title: 'Academic calendar, Odd Semester 2026', note: 'Term dates, holidays, internal exam windows, and result publication dates.' },
@@ -144,6 +150,9 @@ export function About() {
   )
 }
 
+/* ============================================================
+   PEOPLE
+   ============================================================ */
 export function People() {
   const [q, setQ] = useState('')
   const needle = q.trim().toLowerCase()
@@ -210,6 +219,9 @@ export function People() {
   )
 }
 
+/* ============================================================
+   EVENTS
+   ============================================================ */
 function eventDateParts(d) {
   const m = d.match(/(\d+)\s+([A-Za-z]+)\s+(\d+)/)
   if (!m) return null
@@ -222,7 +234,7 @@ export function Events() {
   const [view, setView] = useQueryParam('eventview', 'list')
   const [active, setActive] = useState(null)
   const [registering, setRegistering] = useState(null)
-  const [bookmarks, setBookmarks] = useBookmarks()
+  const [bookmarks, setBookmarks] = useLocalStorage('sait.bookmarks', [])
 
   const upcoming = useMemo(
     () => (filter === 'All' ? UPCOMING_EVENTS : UPCOMING_EVENTS.filter((e) => e.category === filter)),
@@ -489,6 +501,9 @@ function EventDetail({ event, onRegister }) {
   )
 }
 
+/* ============================================================
+   PLACEMENTS
+   ============================================================ */
 export function Placements() {
   const toast = useToast()
   return (
@@ -535,6 +550,9 @@ export function Placements() {
   )
 }
 
+/* ============================================================
+   ALUMNI
+   ============================================================ */
 export function Alumni() {
   const [q, setQ] = useState('')
   const [year, setYear] = useState('All')
@@ -586,6 +604,9 @@ export function Alumni() {
   )
 }
 
+/* ============================================================
+   ACHIEVEMENTS
+   ============================================================ */
 export function Achievements() {
   const [q, setQ] = useState('')
   const filtered = useMemo(() => {
@@ -633,6 +654,9 @@ export function Achievements() {
   )
 }
 
+/* ============================================================
+   ACTIVITY LOGGER
+   ============================================================ */
 export function ActivityLogger() {
   const toast = useToast()
   const [activities, setActivities] = useLocalStorage('sait.activities', SEED_ACTIVITIES)
@@ -892,6 +916,9 @@ function Leaderboard() {
   )
 }
 
+/* ============================================================
+   NOTIFICATIONS
+   ============================================================ */
 export function Notifications() {
   const [open, setOpen] = useState(0)
   const [read, setRead] = useLocalStorage('sait.notices.read', [])
