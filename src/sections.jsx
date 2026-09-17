@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react'
 import { Section, ArrowLink, Initials, SubHead, Drawer, SearchInput, Empty, Kbd, useToast } from './ui.jsx'
 import { useLocalStorage, useQueryParam } from './hooks.js'
 import { useEventCountdown, RegistrationModal } from './extras.jsx'
+import { Constellation, Marquee } from './fancy.jsx'
 import {
   STATS, QUICK_LINKS, FACULTY, EXEC, TEAMS,
   EVENT_CATEGORIES, UPCOMING_EVENTS, PAST_EVENTS,
@@ -24,6 +25,7 @@ export function Home({ onNavigate, onOpenPalette }) {
           <div className="hero-orb hero-orb-3" />
           <div className="hero-grid" />
         </div>
+        <Constellation />
         <div className="container hero-inner">
           <span className="label">CUSAT · School of Engineering · Division of Information Technology</span>
           <h1 className="display-xl">Students Association of Information&nbsp;Technology</h1>
@@ -49,6 +51,17 @@ export function Home({ onNavigate, onOpenPalette }) {
           </div>
         </div>
       </section>
+
+      <Marquee items={[
+        'HackIT 2026',
+        'Registrations open',
+        'CodeFest',
+        'Placement season',
+        'InnoVIT',
+        'Alumni network',
+        'TechTalks',
+        'Workshops every month',
+      ]} />
 
       <Section id="quick" num="01" kicker="Start here" title="The four things students come here for.">
         <div className="row-list">
