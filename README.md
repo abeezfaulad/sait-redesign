@@ -18,7 +18,7 @@ This is a frontend prototype built for the **SAIT Website Redesign Challenge 202
 | **Home** | Hero with animated headline, stats, upcoming previews, recent notices, "what we do" grid, "why SAIT" section |
 | **About** | Tabbed view — overview, facilities, curriculum, department history timeline |
 | **People** | Executive committee, faculty directory, sub-team rosters with search |
-| **Events** | Upcoming + archive, category filters, list / calendar view, countdown, bookmarks |
+| **Events** | Upcoming and archive, category filters, list / calendar view, countdown, bookmarks |
 | **Placements** | Placement stats, recruiter directory, career resources |
 | **Alumni** | Alumni spotlight with batch filter and search |
 | **Achievements** | Hall of fame grouped by year with full-text search |
@@ -26,6 +26,7 @@ This is a frontend prototype built for the **SAIT Website Redesign Challenge 202
 | **Notifications** | Read / unread state, expandable notices |
 | **Gallery** | Filterable photo grid with keyboard-navigable lightbox |
 | **Newsroom** | Short updates from the association, department, and placement cell |
+| **Library** | Division Library — hours, collection, e-resources, rules, contacts |
 | **FAQ** | Searchable Q&A |
 | **Contact** | Validated contact form with direct contact card |
 
@@ -33,7 +34,7 @@ This is a frontend prototype built for the **SAIT Website Redesign Challenge 202
 
 ## Interactive Features
 
-* **Authentication** — Sign in / sign up modal, persistent user session, profile dropdown in nav
+* **Authentication** — Sign in / sign up modal, persistent session, profile dropdown in the nav
 * **Command Palette (`Ctrl` / `Cmd` + `K`)** — Jump to any page, event, person, or action
 * **Keyboard Navigation** — `G` + `H`/`A`/`P`/`E`/`L`/`N` for pages, `?` for help, `\` for the dock
 * **Floating Control Dock** — Live clock, event rotator, accent colour picker, theme toggle
@@ -47,6 +48,19 @@ This is a frontend prototype built for the **SAIT Website Redesign Challenge 202
 * **Typewriter Headline** — On the home hero
 * **Motion Effects** — Scroll reveal, page fade, tilt, ripple, magnetic buttons
 * **Visual Polish** — Custom cursor glow, ambient spotlight, constellation canvas, film grain
+
+### Student Utilities
+*(Type these hotkeys anywhere outside a text input field)*
+
+| Trigger | Description |
+| :--- | :--- |
+| `attendance` | Attendance calculator with shortage warning |
+| `cgpa` | SGPA / CGPA calculator with credit weighting |
+| `timetable` | Semester 5 weekly timetable |
+| `exams` | Exam schedule with live countdown |
+| `contact` | Department contacts — HoD, office, placement |
+| `credits` | B.Tech IT credit structure breakdown |
+| `library` | Jump to the Division Library page |
 
 ---
 
@@ -72,20 +86,24 @@ sait-redesign/
 ├── docs/                      # Built site (GitHub Pages serves this)
 └── src/
     ├── main.jsx               # React entry point
-    ├── App.jsx                # Shell: nav, footer, routing, layout
+    ├── App.jsx                # Shell — nav, footer, routing, layout
     ├── styles.css             # All CSS — tokens, layout, components, animations
     ├── data.js                # All content as JS data structures
     ├── sections.jsx           # Home, About, People, Events, Placements,
     │                          # Alumni, Achievements, ActivityLogger, Notifications
-    ├── extras.jsx             # FAQ, Gallery, Blog, Contact,
+    ├── extras.jsx             # FAQ, Gallery, Blog, Contact, Library,
     │                          # useEventCountdown, RegistrationModal
     ├── ui.jsx                 # Section shell, Toast provider, Drawer, Kbd, SearchInput
     ├── fancy.jsx              # CursorGlow, Spotlight, Constellation, Typewriter,
     │                          # MagneticButton, Marquee, Splash, ScrollTop,
     │                          # PageFade, Parallax, useTilt, useScrollReveal
     ├── auth.jsx               # AuthProvider, AuthModal, UserMenu
-    ├── panel.jsx              # ThemeProvider, FloatingDock, ScrollProgress,
-    │                          # useCounters
+    ├── panel.jsx              # ThemeProvider, FloatingDock, ScrollProgress, useCounters
+    ├── widgets.jsx            # PomodoroTimer, Mascot, DailyQuote, WeatherWidget,
+    │                          # OnlineCounter, Reactions, WishWall, Achievements,
+    │                          # useKonami, ConsoleEasterEgg, ClickParticles
+    ├── easter-eggs.jsx        # Student utility modals (attendance, cgpa, timetable,
+    │                          # exams, contacts, credits, library)
     ├── CommandPalette.jsx     # Ctrl+K search modal
     └── hooks.js               # useLocalStorage, useHotkeys, useQueryParam
 ```
@@ -100,13 +118,13 @@ Requires **Node.js 18+** and **npm**.
 # Clone the repository
 git clone https://github.com/abeezfaulad/sait-redesign.git
 
-# Navigate into the directory
+# Navigate into the project directory
 cd sait-redesign
 
 # Install dependencies
 npm install
 
-# Start the local development server
+# Start local development server
 npm run dev
 ```
 
@@ -130,21 +148,21 @@ npm run deploy     # Build only — output goes to docs/ and is committed
 Both Vercel and GitHub Pages deploy from the same `main` branch.
 
 ### Vercel
-Connected directly to the GitHub repo. Any push to `main` triggers an automatic build and deployment. `vite.config.js` detects the Vercel environment and outputs to `dist/` with base path `/`.
+Connected to the GitHub repo. Pushes to `main` trigger an automatic build. `vite.config.js` detects the Vercel environment and outputs to `dist/` with base `/`.
 
 ### GitHub Pages
-Serves static files directly from the `docs/` folder on the `main` branch. `vite.config.js` outputs to `docs/` with base path `/sait-redesign/` when outside Vercel.
+Serves static files directly from the `docs/` folder on the `main` branch. `vite.config.js` outputs to `docs/` with base `/sait-redesign/` outside Vercel.
 
-To deploy a new change:
+To deploy a change:
 
 ```bash
-npm run deploy
+npm run deploy       # Rebuild docs/
 git add .
 git commit -m "Update build"
 git push
 ```
 
-GitHub Pages will automatically pick up the new build within a minute.
+GitHub Pages picks up the new build within a minute.
 
 ---
 
@@ -168,28 +186,29 @@ Defined in `:root` of `styles.css`:
 * **Mono:** *IBM Plex Mono* — labels, dates, stats, keyboard hints
 
 ### Theme & Accent Switching
-* **Theme switching:** The `ThemeProvider` in `panel.jsx` sets `document.documentElement.dataset.theme`, which flips CSS variables between `:root` and `html[data-theme="light"]`.
-* **Accent switching:** Dynamically updates `--accent`, `--accent-2`, and `--accent-glow` as inline properties on `documentElement`. All components automatically inherit the selected accent.
+* **Theme switching:** `ThemeProvider` in `panel.jsx` sets `document.documentElement.dataset.theme`, which flips CSS variables in `:root` and `html[data-theme="light"]`.
+* **Accent switching:** Sets `--accent`, `--accent-2`, and `--accent-glow` as inline properties on `documentElement`. Everything downstream picks them up automatically.
 
 ---
 
 ## Accessibility
 
-* All interactive elements are semantic `<button>` or `<a>` tags.
-* Modals, drawers, command palette, and lightboxes trap focus and close with `Esc`.
-* `prefers-reduced-motion` media query disables animations for users who prefer reduced motion.
-* Visible focus indicators across all form inputs and interactive elements.
-* `aria-label` attributes present on all icon-only controls.
-* Clean semantic heading hierarchy (`h1`–`h6`).
+* All interactive elements are real `<button>` or `<a>` tags.
+* Modal / drawer / palette / lightbox all trap focus and close with `Esc`.
+* `prefers-reduced-motion` disables every animation.
+* Focus states visible on all form inputs.
+* ARIA labels on icon-only controls.
+* Semantic heading hierarchy.
 
 ---
 
 ## What This Project Is Not
 
-* **Not a real backend:** All data is mock data hardcoded in `src/data.js`.
-* **Not a real auth system:** User credentials and sessions stay in `localStorage`; no server authentication is involved.
-* **Not integrated with official systems:** Unaffiliated with actual production infrastructure at CUSAT or the IT department.
-* *The activity logger, notices, gallery, and login are prototypes meant to demonstrate UI/UX and interaction patterns rather than production behavior.*
+* **Not a real backend:** All data is mock data, hardcoded in `src/data.js`.
+* **Not a real auth system:** Credentials stay in `localStorage`; no server involved.
+* **Not integrated with official systems:** Unaffiliated with production systems at CUSAT or the IT department.
+
+*The activity logger, notices, gallery, and login are prototypes — they demonstrate UI and interaction patterns, not production behaviour.*
 
 ---
 
