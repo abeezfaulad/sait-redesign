@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState } from 'react'
 
 export function useLocalStorage(key, initial) {
   const [value, setValue] = useState(() => {
@@ -48,8 +48,6 @@ export function useHotkeys(map) {
           if (isLetter) { lastLetter = k; lastLetterAt = now }
           return
         }
-        // Do not start a g-sequence mid-word (prevents typing "cgpa" from
-        // firing "g then p" = navigate to People)
         if (combo === 'g' && recentLetter) {
           if (isLetter) { lastLetter = k; lastLetterAt = now }
           return
@@ -98,4 +96,52 @@ export function useReducedMotion() {
     return () => m.removeEventListener('change', h)
   }, [])
   return reduced
+}
+
+export function useDevice() {
+  const read = () => {
+    if (typeof window === 'undefined') {
+      return { touch: false, mobile: false, tablet: false, desktop: true, width: 1280 }
+    }
+    const touch = window.matchMedia('(hover: none) and (pointer: coarse)').matches
+    const width = window.innerWidth
+    return {
+      touch,
+      mobile: width < 768,
+      tablet: width >= 768 && width < 1024,
+      desktop: width >= 1024,
+      width,
+    }
+  }
+
+  const [device, setDevice] = useState(read)
+
+  useEffect(() => {
+    let raf = 0
+    const update = () => {
+      if (raf) return
+      raf = requestAnimationFrame(() => {
+        raf = 0
+        setDevice(read())
+      })
+    }
+    window.addEventListener('resize', update)
+    window.addEventListener('orientationchange', update)
+    const hover = window.matchMedia('(hover: none) and (pointer: coarse)')
+    hover.addEventListener('change', update)
+    return () => {
+      window.removeEventListener('resize', update)
+      window.removeEventListener('orientationchange', update)
+      hover.removeEventListener('change', update)
+      if (raf) cancelAnimationFrame(raf)
+    }
+  }, [])
+
+  useEffect(() => {
+    const el = document.documentElement
+    el.dataset.device = device.touch ? 'touch' : 'pointer'
+    el.dataset.layout = device.mobile ? 'mobile' : device.tablet ? 'tablet' : 'desktop'
+  }, [device])
+
+  return device
 }

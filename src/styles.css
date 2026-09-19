@@ -2379,3 +2379,358 @@ svg, canvas, img {
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
 }
+
+/* ============================================================
+   DEVICE-AWARE ADAPTATIONS
+   ============================================================ */
+
+/* --- Hide keyboard hints on touch devices --- */
+html[data-device="touch"] .kbd,
+html[data-layout="mobile"] .kbd,
+html[data-device="touch"] .palette-keys,
+html[data-device="touch"] .form-hint,
+html[data-device="touch"] .dock-trigger-key,
+html[data-device="touch"] .dock-keys,
+html[data-device="touch"] .footer-link-btn {
+  display: none !important;
+}
+
+/* Palette trigger is desktop-only */
+@media (hover: none), (pointer: coarse), (max-width: 767px) {
+  .palette-trigger { display: none !important; }
+}
+
+/* ============================================================
+   MOBILE SEARCH BUTTON
+   ============================================================ */
+.msearch {
+  display: inline-grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text-2);
+  cursor: pointer;
+  transition: color 140ms, border-color 140ms, transform 140ms;
+}
+.msearch:hover,
+.msearch:active {
+  color: var(--accent);
+  border-color: var(--accent);
+  transform: scale(0.96);
+}
+
+/* ============================================================
+   MOBILE BOTTOM TAB BAR
+   ============================================================ */
+.mtab {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 95;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  background: color-mix(in oklab, var(--bg) 92%, transparent);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-top: 1px solid var(--border);
+  padding-bottom: env(safe-area-inset-bottom, 0);
+  padding-top: 6px;
+}
+
+.mtab button {
+  background: none;
+  border: 0;
+  padding: 6px 4px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  color: var(--text-3);
+  font-family: var(--display);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+  cursor: pointer;
+  position: relative;
+  transition: color 180ms, transform 140ms;
+  min-height: 52px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mtab button:active { transform: scale(0.94); }
+
+.mtab button[data-active="true"] { color: var(--accent); }
+
+.mtab button[data-active="true"]::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 24px;
+  height: 3px;
+  border-radius: 0 0 3px 3px;
+  background: var(--accent);
+  animation: mtab-indicator 200ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@keyframes mtab-indicator {
+  from { width: 0; opacity: 0; }
+  to   { width: 24px; opacity: 1; }
+}
+
+.mtab-icon {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  transition: transform 200ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.mtab button[data-active="true"] .mtab-icon {
+  transform: translateY(-1px) scale(1.05);
+}
+
+.mtab-label {
+  font-size: 10px;
+  letter-spacing: 0.02em;
+  line-height: 1;
+}
+
+/* ============================================================
+   MOBILE SHEET (More menu)
+   ============================================================ */
+.msheet-root {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  display: flex;
+  align-items: flex-end;
+}
+
+.msheet-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  animation: fade 200ms ease-out;
+}
+
+.msheet {
+  position: relative;
+  width: 100%;
+  max-height: 80vh;
+  background: var(--surface);
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
+  padding: 10px 20px calc(24px + env(safe-area-inset-bottom, 0));
+  animation: msheet-up 260ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  overflow-y: auto;
+  box-shadow: 0 -20px 60px -12px rgba(0, 0, 0, 0.6);
+}
+
+@keyframes msheet-up {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+
+.msheet-handle {
+  width: 40px;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--border-2);
+  margin: 6px auto 16px;
+}
+
+.msheet-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 18px;
+}
+
+.msheet-close {
+  background: none;
+  border: 0;
+  padding: 6px 2px;
+  font-family: var(--display);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--accent);
+  cursor: pointer;
+}
+
+.msheet-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.msheet-grid button {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px 14px;
+  text-align: left;
+  font-family: var(--display);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-2);
+  cursor: pointer;
+  transition: background 140ms, border-color 140ms, color 140ms, transform 140ms;
+  min-height: 52px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.msheet-grid button:active { transform: scale(0.97); }
+
+.msheet-grid button[data-active="true"] {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: color-mix(in oklab, var(--accent) 12%, var(--surface-2));
+}
+
+/* ============================================================
+   BODY PADDING (leave space for tab bar on mobile)
+   ============================================================ */
+html[data-layout="mobile"] body {
+  padding-bottom: calc(72px + env(safe-area-inset-bottom, 0));
+}
+
+html[data-layout="mobile"] .toasts {
+  bottom: calc(80px + env(safe-area-inset-bottom, 0));
+}
+
+html[data-layout="mobile"] .scroll-top {
+  bottom: calc(78px + env(safe-area-inset-bottom, 0));
+  left: 14px;
+  padding: 8px 12px;
+}
+
+html[data-layout="mobile"] .scroll-top-label { display: none; }
+
+/* Hide floating dock on mobile — tab bar replaces it */
+html[data-layout="mobile"] .dock,
+html[data-device="touch"][data-layout="mobile"] .dock {
+  display: none !important;
+}
+
+/* Ticker and nav take a bit less space on mobile */
+html[data-layout="mobile"] .ticker { padding: 8px 0; font-size: 11px; }
+html[data-layout="mobile"] .nav-inner { padding-top: 4px; padding-bottom: 4px; }
+
+/* ============================================================
+   TOUCH DEVICE POLISH
+   ============================================================ */
+@media (hover: none) and (pointer: coarse) {
+  /* Larger tap targets everywhere */
+  .btn { min-height: 46px; padding: 13px 20px; }
+  .btn.ghost { min-height: 46px; }
+  .filters button { min-height: 38px; padding: 9px 15px; }
+  .view-toggle button { min-height: 40px; padding: 9px 16px; }
+  .nav-auth-btn { min-height: 42px; }
+  .bookmark-btn { min-width: 44px; min-height: 44px; }
+
+  /* Remove hover-only effects that don't apply on touch */
+  .row:hover { padding-left: 0; background: transparent; }
+  .person:hover { transform: none; }
+  .home-card:hover { transform: none; }
+  .blog-card:hover { transform: none; }
+  .achievement:hover { transform: none; }
+  .cal-cell:hover { transform: none; }
+  .event-row:hover { padding-left: 0; background: transparent; }
+
+  /* Give the active state a subtle feel instead */
+  .row:active { background: var(--surface); }
+  .person:active { background: var(--surface-2); }
+  .home-card:active { background: var(--surface-2); }
+  .blog-card:active { background: var(--surface-2); }
+  .achievement:active { background: var(--surface-2); }
+  .cal-cell:active { background: var(--surface-2); }
+
+  /* Disable the cursor glow trail (no cursor on touch) */
+  .cursor-glow,
+  .spotlight {
+    display: none !important;
+  }
+
+  /* Simplify splash for slower mobile networks */
+  .splash-mark { font-size: clamp(2.5rem, 14vw, 4rem); }
+  .splash-sub { font-size: 10px; }
+}
+
+/* ============================================================
+   MOBILE — narrower content, tighter spacing
+   ============================================================ */
+@media (max-width: 767px) {
+  /* Section rail becomes a plain label row */
+  .section-rail {
+    flex-direction: row;
+    gap: 12px;
+    align-items: baseline;
+  }
+  .section-rail .label + .label::before { display: none; }
+  .section-rail .label + .label { padding-left: 0; }
+
+  /* Auth modal — full sheet feel on mobile */
+  .auth-modal {
+    grid-template-columns: 1fr;
+    width: calc(100vw - 24px);
+    max-height: 88vh;
+  }
+  .auth-visual {
+    padding: 28px 24px;
+    min-height: 140px;
+  }
+  .auth-visual-mark { font-size: 2rem; }
+  .auth-visual-tag { font-size: 10px; }
+  .auth-form-wrap { padding: 24px 22px; }
+  .auth-title { font-size: 1.375rem; }
+
+  /* Registration modal full sheet */
+  .reg-modal { width: calc(100vw - 24px); max-height: 92vh; }
+
+  /* Lightbox full bleed */
+  .lightbox { width: calc(100vw - 16px); border-radius: 10px; }
+  .lightbox-meta { padding: 14px 16px; }
+  .lightbox-title { font-size: 14px; }
+
+  /* Command palette — full width, higher */
+  .palette-root { padding-top: 4vh; align-items: flex-start; }
+  .palette { width: calc(100vw - 16px); max-height: 78vh; border-radius: 12px; }
+  .palette-input { padding: 14px 16px; }
+  .palette-input input { font-size: 16px; }
+
+  /* Egg panel full width */
+  .egg-panel,
+  .egg-panel-wide {
+    width: calc(100vw - 16px);
+    max-height: 90vh;
+    border-radius: 12px;
+  }
+  .egg-panel-head { padding: 18px 18px 14px; }
+  .egg-panel-body { padding: 18px 18px 24px; }
+
+  /* Footer stack */
+  .footer-grid { grid-template-columns: 1fr; gap: 32px; }
+  .footer-bottom { flex-direction: column; gap: 8px; align-items: flex-start; }
+
+  /* Ticker wraps, badge inline */
+  .ticker .container { gap: 10px; }
+  .ticker b { font-size: 9px; padding: 2px 6px; }
+
+  /* Empty space above hero — push less */
+  .hero .hero-eyebrow { font-size: 10px; }
+}
+
+/* ============================================================
+   Reduced motion — kill mobile sheet animation
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  .msheet { animation: none; }
+  .mtab button[data-active="true"]::before { animation: none; }
+}

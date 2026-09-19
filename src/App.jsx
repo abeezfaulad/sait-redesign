@@ -6,7 +6,7 @@ import {
 } from './sections.jsx'
 import { FAQ, Gallery, Blog, Contact, Library } from './extras.jsx'
 import { ToastProvider, ShortcutHelp, Kbd } from './ui.jsx'
-import { useHotkeys, useLocalStorage } from './hooks.js'
+import { useHotkeys, useLocalStorage, useDevice } from './hooks.js'
 import CommandPalette from './CommandPalette.jsx'
 import { ThemeProvider, ScrollProgress, FloatingDock, useCounters } from './panel.jsx'
 import {
@@ -20,6 +20,7 @@ import {
   useKonami, KonamiOverlay, PomodoroTimer,
 } from './widgets.jsx'
 import { EasterEggs, EggHints } from './easter-eggs.jsx'
+import { MobileNav, MobileSearchButton } from './MobileNav.jsx'
 
 function Shell() {
   const [page, setPage] = useState('home')
@@ -34,6 +35,7 @@ function Shell() {
 
   const greeting = useGreeting()
   const { unlock } = useAchievements()
+  const device = useDevice()
 
   useCounters(page)
   useScrollReveal([page])
@@ -51,7 +53,7 @@ function Shell() {
   /* Global ripple effect */
   useEffect(() => {
     const onClick = (e) => {
-      const btn = e.target.closest('.btn, .nav-auth-btn, .dock-trigger, .filters button, .view-toggle button, .chip, .reaction')
+      const btn = e.target.closest('.btn, .nav-auth-btn, .dock-trigger, .filters button, .view-toggle button, .chip, .reaction, .mtab button, .msheet-grid button')
       if (!btn) return
       const rect = btn.getBoundingClientRect()
       const size = Math.max(rect.width, rect.height)
@@ -100,7 +102,7 @@ function Shell() {
     return () => window.removeEventListener('sait:logger', onLogger)
   }, [unlock])
 
-  /* Easter egg navigation (e.g. typing "library") */
+  /* Easter egg navigation */
   useEffect(() => {
     const onNav = (e) => {
       if (e.detail?.page) navigate(e.detail.page)
@@ -210,6 +212,7 @@ function Shell() {
   ]
 
   const allNav = [...NAV, ...EXTRA_NAV]
+  const showKeyboardHints = !device.touch && !device.mobile
 
   return (
     <>
@@ -236,6 +239,7 @@ function Shell() {
           <button className="wordmark" onClick={() => navigate('home')}>
             SAIT <small>CUSAT · IT Division</small>
           </button>
+
           <nav className="nav-links">
             {NAV.map((n) => (
               <button key={n.id} data-active={page === n.id} onClick={() => navigate(n.id)}>{n.label}</button>
@@ -253,18 +257,33 @@ function Shell() {
               {unreadNotices > 0 && <span className="badge">{unreadNotices}</span>}
             </button>
           </nav>
+
           <div className="nav-right">
-            <button className="palette-trigger" onClick={() => setPaletteOpen(true)} aria-label="Open command palette">
-              <span>Search</span>
-              <span className="palette-keys"><Kbd>Ctrl</Kbd><Kbd>K</Kbd></span>
-            </button>
+            {/* Desktop: show palette trigger with keyboard hint */}
+            {showKeyboardHints && (
+              <button className="palette-trigger" onClick={() => setPaletteOpen(true)} aria-label="Open search">
+                <span>Search</span>
+                <span className="palette-keys"><Kbd>Ctrl</Kbd><Kbd>K</Kbd></span>
+              </button>
+            )}
+
+            {/* Mobile / touch: icon-only search button */}
+            {!showKeyboardHints && (
+              <MobileSearchButton onClick={() => setPaletteOpen(true)} />
+            )}
+
             <UserMenu onOpenAuth={() => openAuth('login')} />
-            <button className="nav-toggle" onClick={() => setMenuOpen((o) => !o)} aria-expanded={menuOpen}>
-              {menuOpen ? 'Close' : 'Menu'}
-            </button>
+
+            {/* Hamburger menu only on small desktop / tablet (mobile uses tab bar) */}
+            {!device.mobile && (
+              <button className="nav-toggle" onClick={() => setMenuOpen((o) => !o)} aria-expanded={menuOpen}>
+                {menuOpen ? 'Close' : 'Menu'}
+              </button>
+            )}
           </div>
         </div>
-        {menuOpen && (
+
+        {menuOpen && !device.mobile && (
           <div className="container nav-mobile">
             {[...allNav, { id: 'notifications', label: 'Notices' }].map((n) => (
               <button key={n.id} data-active={page === n.id} onClick={() => navigate(n.id)}>{n.label}</button>
@@ -334,18 +353,27 @@ function Shell() {
           </div>
           <div className="footer-bottom">
             <span>© 2026 SAIT, CUSAT. All rights reserved.</span>
-            <span>
-              <button className="footer-link-btn" onClick={() => setHelpOpen(true)}>
-                Keyboard shortcuts <Kbd>?</Kbd>
-              </button>
-            </span>
+            {showKeyboardHints && (
+              <span>
+                <button className="footer-link-btn" onClick={() => setHelpOpen(true)}>
+                  Keyboard shortcuts <Kbd>?</Kbd>
+                </button>
+              </span>
+            )}
           </div>
         </div>
       </footer>
 
-      <div className="pomo-floating">
-        <PomodoroTimer compact />
-      </div>
+      {/* Desktop widgets */}
+      {!device.mobile && (
+        <>
+          <div className="pomo-floating">
+            <PomodoroTimer compact />
+          </div>
+          <Mascot />
+          <EggHints />
+        </>
+      )}
 
       <FloatingDock
         navigate={navigate}
@@ -355,8 +383,9 @@ function Shell() {
       />
 
       <ScrollTop />
-      <Mascot />
-      <EggHints />
+
+      {/* Mobile bottom navigation */}
+      {device.mobile && <MobileNav route={page} navigate={navigate} />}
 
       <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} commands={commands} />
       <ShortcutHelp open={helpOpen} onClose={() => setHelpOpen(false)} items={shortcuts} />
