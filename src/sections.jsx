@@ -84,7 +84,6 @@ export function Home({ onNavigate, onOpenPalette, onOpenAuth }) {
         'Activity logger open', 'Department notices',
       ]} />
 
-      {/* ---------- DAILY WIDGETS ---------- */}
       <Section id="daily" num="01" kicker="Today" title="A snapshot of the day.">
         <div className="dash-row">
           <DailyQuote />
@@ -232,7 +231,6 @@ export function Home({ onNavigate, onOpenPalette, onOpenAuth }) {
         </div>
       </Section>
 
-      {/* ---------- WISH WALL ---------- */}
       <WishWall />
     </>
   )
@@ -277,173 +275,236 @@ const CURRICULUM = [
   { semester: '7–8', focus: 'Specialisation & project', detail: 'Electives across systems, AI, security, and cloud. Two-semester capstone project and internship.' },
 ]
 
+const TABS = [
+  {
+    id: 'overview',
+    label: 'Overview',
+    icon: (
+      <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="2" y="2" width="5" height="5" rx="1" />
+        <rect x="9" y="2" width="5" height="5" rx="1" />
+        <rect x="2" y="9" width="5" height="5" rx="1" />
+        <rect x="9" y="9" width="5" height="5" rx="1" />
+      </svg>
+    ),
+  },
+  {
+    id: 'facilities',
+    label: 'Facilities',
+    icon: (
+      <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M2 14V5l6-3 6 3v9" />
+        <rect x="6" y="9" width="4" height="5" />
+        <line x1="5" y1="6" x2="5" y2="7" />
+        <line x1="11" y1="6" x2="11" y2="7" />
+      </svg>
+    ),
+  },
+  {
+    id: 'curriculum',
+    label: 'Curriculum',
+    icon: (
+      <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M3 3h6a2 2 0 0 1 2 2v8H5a2 2 0 0 0-2 2V3z" />
+        <path d="M13 3h-2a2 2 0 0 0-2 2v10a2 2 0 0 1 2-2h2V3z" />
+      </svg>
+    ),
+  },
+  {
+    id: 'history',
+    label: 'History',
+    icon: (
+      <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="8" cy="8" r="6" />
+        <polyline points="8,4 8,8 11,10" />
+      </svg>
+    ),
+  },
+]
+
 export function About() {
   const [open, setOpen] = useState(0)
   const [tab, setTab] = useState('overview')
+  const tabIndex = TABS.findIndex((t) => t.id === tab)
 
   return (
     <Section id="about" num="02" kicker="About" title="The department and the association."
       lede="The Division of Information Technology was established within the School of Engineering, CUSAT, to build strong foundations in computing, systems and software. SAIT is its student body.">
 
-      <div className="about-tabs" role="tablist">
-        <button role="tab" data-active={tab === 'overview'} onClick={() => setTab('overview')}>Overview</button>
-        <button role="tab" data-active={tab === 'facilities'} onClick={() => setTab('facilities')}>Facilities</button>
-        <button role="tab" data-active={tab === 'curriculum'} onClick={() => setTab('curriculum')}>Curriculum</button>
-        <button role="tab" data-active={tab === 'history'} onClick={() => setTab('history')}>History</button>
+      <div
+        className="about-tabs"
+        style={{ '--tab-index': tabIndex, '--tab-count': TABS.length }}
+        role="tablist"
+      >
+        {TABS.map((t) => (
+          <button
+            key={t.id}
+            role="tab"
+            aria-selected={tab === t.id}
+            data-active={tab === t.id}
+            onClick={() => setTab(t.id)}
+          >
+            <span className="about-tab-icon">{t.icon}</span>
+            <span className="about-tab-label">{t.label}</span>
+          </button>
+        ))}
+        <span className="about-tabs-indicator" aria-hidden="true" />
       </div>
 
-      {tab === 'overview' && (
-        <>
-          <div className="cols">
-            <div>
-              <SubHead>Vision</SubHead>
-              <p className="muted">
-                To be a division known for students who build — technically rigorous,
-                professionally prepared, and useful to the communities they go on to
-                serve.
+      <div className="about-tab-content" key={tab}>
+        {tab === 'overview' && (
+          <>
+            <div className="cols">
+              <div>
+                <SubHead>Vision</SubHead>
+                <p className="muted">
+                  To be a division known for students who build — technically rigorous,
+                  professionally prepared, and useful to the communities they go on to
+                  serve.
+                </p>
+              </div>
+              <div>
+                <SubHead>Mission</SubHead>
+                <ul className="muted" style={{ paddingLeft: 18, margin: 0, lineHeight: 1.8 }}>
+                  <li>Run a consistent calendar of technical and cultural events.</li>
+                  <li>Maintain an open record of student activity and achievement.</li>
+                  <li>Support placement preparation through structured resources.</li>
+                  <li>Keep the alumni network connected to the department.</li>
+                  <li>Publish honest, useful information in one place.</li>
+                </ul>
+              </div>
+            </div>
+
+            <div style={{ marginTop: 56 }}>
+              <SubHead>The department</SubHead>
+              <p className="muted" style={{ maxWidth: '72ch' }}>
+                The Division of Information Technology sits within the School of Engineering
+                at Cochin University of Science and Technology. It offers a four-year
+                B.Tech programme in Information Technology, admitting 60 students per year
+                through the Kerala state engineering entrance. The division has graduated
+                over two thousand engineers since its first batch in 2003.
+              </p>
+              <p className="muted" style={{ maxWidth: '72ch', marginTop: 16 }}>
+                The department's research spans systems, distributed computing, machine
+                learning, information security and data engineering. Faculty publish
+                regularly and supervise both undergraduate capstone projects and PhD
+                candidates under the university's research programmes.
               </p>
             </div>
-            <div>
-              <SubHead>Mission</SubHead>
-              <ul className="muted" style={{ paddingLeft: 18, margin: 0, lineHeight: 1.8 }}>
-                <li>Run a consistent calendar of technical and cultural events.</li>
-                <li>Maintain an open record of student activity and achievement.</li>
-                <li>Support placement preparation through structured resources.</li>
-                <li>Keep the alumni network connected to the department.</li>
-                <li>Publish honest, useful information in one place.</li>
-              </ul>
+
+            <div style={{ marginTop: 56 }}>
+              <SubHead>The association</SubHead>
+              <p className="muted" style={{ maxWidth: '72ch' }}>
+                SAIT — the Students Association of Information Technology — is the elected
+                student body of the division. It exists for three purposes: to run the
+                events calendar, to maintain the historical record of what the division's
+                students achieve, and to act as a bridge between students, faculty,
+                alumni, and industry.
+              </p>
+              <p className="muted" style={{ maxWidth: '72ch', marginTop: 16 }}>
+                The association is led by an elected executive committee, supported by
+                five sub-teams (Tech, Media, Events, PR, Content), and advised by a staff
+                coordinator. Elections happen annually at the start of the academic year.
+              </p>
             </div>
-          </div>
 
-          <div style={{ marginTop: 56 }}>
-            <SubHead>The department</SubHead>
-            <p className="muted" style={{ maxWidth: '72ch' }}>
-              The Division of Information Technology sits within the School of Engineering
-              at Cochin University of Science and Technology. It offers a four-year
-              B.Tech programme in Information Technology, admitting 60 students per year
-              through the Kerala state engineering entrance. The division has graduated
-              over two thousand engineers since its first batch in 2003.
-            </p>
-            <p className="muted" style={{ maxWidth: '72ch', marginTop: 16 }}>
-              The department's research spans systems, distributed computing, machine
-              learning, information security and data engineering. Faculty publish
-              regularly and supervise both undergraduate capstone projects and PhD
-              candidates under the university's research programmes.
-            </p>
-          </div>
-
-          <div style={{ marginTop: 56 }}>
-            <SubHead>The association</SubHead>
-            <p className="muted" style={{ maxWidth: '72ch' }}>
-              SAIT — the Students Association of Information Technology — is the elected
-              student body of the division. It exists for three purposes: to run the
-              events calendar, to maintain the historical record of what the division's
-              students achieve, and to act as a bridge between students, faculty,
-              alumni, and industry.
-            </p>
-            <p className="muted" style={{ maxWidth: '72ch', marginTop: 16 }}>
-              The association is led by an elected executive committee, supported by
-              five sub-teams (Tech, Media, Events, PR, Content), and advised by a staff
-              coordinator. Elections happen annually at the start of the academic year.
-            </p>
-          </div>
-
-          <div style={{ marginTop: 56 }}>
-            <SubHead>Faculty and administration</SubHead>
-            <div className="people-grid">
-              {FACULTY.map((f) => (
-                <div className="person" key={f.name}>
-                  <Initials name={f.name} />
-                  <div>
-                    <div className="p-name">{f.name}</div>
-                    <div className="p-role">{f.role}</div>
+            <div style={{ marginTop: 56 }}>
+              <SubHead>Faculty and administration</SubHead>
+              <div className="people-grid">
+                {FACULTY.map((f) => (
+                  <div className="person" key={f.name}>
+                    <Initials name={f.name} />
+                    <div>
+                      <div className="p-name">{f.name}</div>
+                      <div className="p-role">{f.role}</div>
+                    </div>
                   </div>
+                ))}
+              </div>
+            </div>
+
+            <div style={{ marginTop: 56 }}>
+              <SubHead>Academic resources</SubHead>
+              <div>
+                {RESOURCES.map((r, i) => {
+                  const isOpen = open === i
+                  return (
+                    <div className="acc-item" key={r.title} data-open={isOpen}>
+                      <button className="acc-head" onClick={() => setOpen(isOpen ? -1 : i)} aria-expanded={isOpen}>
+                        <div>
+                          <div className="acc-title">{r.title}</div>
+                          <div className="acc-date" style={{ marginTop: 4 }}>Resource</div>
+                        </div>
+                        <span className="acc-plus" aria-hidden="true">+</span>
+                      </button>
+                      {isOpen && (
+                        <div className="acc-body">
+                          {r.note}
+                          <div style={{ marginTop: 14 }}><ArrowLink>Open resource</ArrowLink></div>
+                        </div>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          </>
+        )}
+
+        {tab === 'facilities' && (
+          <>
+            <p className="muted" style={{ maxWidth: '72ch', marginBottom: 32 }}>
+              The IT Division occupies its own block within the School of Engineering,
+              with dedicated teaching labs, a seminar hall, project rooms and a small
+              reference library. All facilities are available to students of the division
+              during working hours.
+            </p>
+            <div className="home-grid-2">
+              {FACILITIES.map((f, i) => (
+                <div className="home-card" key={f.name} style={{ '--i': i }}>
+                  <div className="home-card-title">{f.name}</div>
+                  <p className="home-card-body">{f.detail}</p>
                 </div>
               ))}
             </div>
-          </div>
+          </>
+        )}
 
-          <div style={{ marginTop: 56 }}>
-            <SubHead>Academic resources</SubHead>
-            <div>
-              {RESOURCES.map((r, i) => {
-                const isOpen = open === i
-                return (
-                  <div className="acc-item" key={r.title} data-open={isOpen}>
-                    <button className="acc-head" onClick={() => setOpen(isOpen ? -1 : i)} aria-expanded={isOpen}>
-                      <div>
-                        <div className="acc-title">{r.title}</div>
-                        <div className="acc-date" style={{ marginTop: 4 }}>Resource</div>
-                      </div>
-                      <span className="acc-plus" aria-hidden="true">+</span>
-                    </button>
-                    {isOpen && (
-                      <div className="acc-body">
-                        {r.note}
-                        <div style={{ marginTop: 14 }}><ArrowLink>Open resource</ArrowLink></div>
-                      </div>
-                    )}
+        {tab === 'curriculum' && (
+          <>
+            <p className="muted" style={{ maxWidth: '72ch', marginBottom: 32 }}>
+              The B.Tech IT programme runs over eight semesters and follows the 2022
+              scheme. The first two years build mathematical and systems foundations;
+              the last two shift into specialisation, electives, and a two-semester
+              capstone project.
+            </p>
+            <div className="row-list">
+              {CURRICULUM.map((c, i) => (
+                <div className="row" key={c.semester} style={{ '--i': i }}>
+                  <span className="row-date">Sem {c.semester}</span>
+                  <div>
+                    <div className="row-title">{c.focus}</div>
+                    <div className="row-meta" style={{ marginTop: 8 }}>{c.detail}</div>
                   </div>
-                )
-              })}
-            </div>
-          </div>
-        </>
-      )}
-
-      {tab === 'facilities' && (
-        <>
-          <p className="muted" style={{ maxWidth: '72ch', marginBottom: 32 }}>
-            The IT Division occupies its own block within the School of Engineering,
-            with dedicated teaching labs, a seminar hall, project rooms and a small
-            reference library. All facilities are available to students of the division
-            during working hours.
-          </p>
-          <div className="home-grid-2">
-            {FACILITIES.map((f) => (
-              <div className="home-card" key={f.name}>
-                <div className="home-card-title">{f.name}</div>
-                <p className="home-card-body">{f.detail}</p>
-              </div>
-            ))}
-          </div>
-        </>
-      )}
-
-      {tab === 'curriculum' && (
-        <>
-          <p className="muted" style={{ maxWidth: '72ch', marginBottom: 32 }}>
-            The B.Tech IT programme runs over eight semesters and follows the 2022
-            scheme. The first two years build mathematical and systems foundations;
-            the last two shift into specialisation, electives, and a two-semester
-            capstone project.
-          </p>
-          <div className="row-list">
-            {CURRICULUM.map((c) => (
-              <div className="row" key={c.semester}>
-                <span className="row-date">Sem {c.semester}</span>
-                <div>
-                  <div className="row-title">{c.focus}</div>
-                  <div className="row-meta" style={{ marginTop: 8 }}>{c.detail}</div>
+                  <span className="row-meta" />
                 </div>
-                <span className="row-meta" />
+              ))}
+            </div>
+          </>
+        )}
+
+        {tab === 'history' && (
+          <div className="timeline">
+            {TIMELINE.map((t, i) => (
+              <div className="timeline-item" key={t.year} style={{ '--i': i }}>
+                <div className="timeline-year">{t.year}</div>
+                <div className="timeline-dot" aria-hidden="true" />
+                <div className="timeline-body">{t.event}</div>
               </div>
             ))}
           </div>
-        </>
-      )}
-
-      {tab === 'history' && (
-        <div className="timeline">
-          {TIMELINE.map((t) => (
-            <div className="timeline-item" key={t.year}>
-              <div className="timeline-year">{t.year}</div>
-              <div className="timeline-dot" aria-hidden="true" />
-              <div className="timeline-body">{t.event}</div>
-            </div>
-          ))}
-        </div>
-      )}
+        )}
+      </div>
     </Section>
   )
 }
