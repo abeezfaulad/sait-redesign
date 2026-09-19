@@ -4,7 +4,7 @@ import {
   Home, About, People, Events, Placements,
   Alumni, Achievements, ActivityLogger, Notifications,
 } from './sections.jsx'
-import { FAQ, Gallery, Blog, Contact } from './extras.jsx'
+import { FAQ, Gallery, Blog, Contact, Library } from './extras.jsx'
 import { ToastProvider, ShortcutHelp, Kbd } from './ui.jsx'
 import { useHotkeys, useLocalStorage } from './hooks.js'
 import CommandPalette from './CommandPalette.jsx'
@@ -19,6 +19,7 @@ import {
   Mascot, ConsoleEasterEgg, ClickParticles,
   useKonami, KonamiOverlay, PomodoroTimer,
 } from './widgets.jsx'
+import { EasterEggs, EggHints } from './easter-eggs.jsx'
 
 function Shell() {
   const [page, setPage] = useState('home')
@@ -43,7 +44,6 @@ function Shell() {
     unlock('konami')
   })
 
-  /* First visit badge */
   useEffect(() => {
     unlock('first-visit')
   }, [unlock])
@@ -100,6 +100,15 @@ function Shell() {
     return () => window.removeEventListener('sait:logger', onLogger)
   }, [unlock])
 
+  /* Easter egg navigation (e.g. typing "library") */
+  useEffect(() => {
+    const onNav = (e) => {
+      if (e.detail?.page) navigate(e.detail.page)
+    }
+    window.addEventListener('sait:navigate', onNav)
+    return () => window.removeEventListener('sait:navigate', onNav)
+  }, [])
+
   const unreadNotices = Math.max(0, 4 - readNotices.length)
 
   useEffect(() => {
@@ -139,6 +148,7 @@ function Shell() {
     pg('achievements', 'Achievements', 'hall of fame awards')
     pg('gallery', 'Gallery', 'photos images')
     pg('blog', 'Newsroom', 'updates posts blog')
+    pg('library', 'Division Library', 'books journals reading')
     pg('logger', 'Activity logger', 'submit record points')
     pg('faq', 'FAQ', 'questions help')
     pg('contact', 'Contact', 'email phone reach')
@@ -159,7 +169,6 @@ function Shell() {
 
     list.push({ id: 'action-logs', group: 'Actions', label: 'Open activity logger', hint: 'Action', run: () => navigate('logger') })
     list.push({ id: 'action-signin', group: 'Actions', label: 'Sign in / Create account', hint: 'Auth', run: () => openAuth('login') })
-    list.push({ id: 'action-wish', group: 'Actions', label: 'Open the wish wall', hint: 'Community', run: () => navigate('home') })
     list.push({ id: 'action-help', group: 'Actions', label: 'Show keyboard shortcuts', hint: '?', run: () => setHelpOpen(true) })
     return list
   }, [])
@@ -191,6 +200,13 @@ function Shell() {
     { label: 'Go to Logger', keys: ['G', 'L'] },
     { label: 'Go to Notices', keys: ['G', 'N'] },
     { label: 'Konami code', keys: ['↑', '↑', '↓', '↓', '←', '→', '←', '→', 'B', 'A'] },
+    { label: 'Type "attendance"', keys: ['Attendance calculator'] },
+    { label: 'Type "cgpa"', keys: ['SGPA calculator'] },
+    { label: 'Type "timetable"', keys: ['S5 weekly schedule'] },
+    { label: 'Type "exams"', keys: ['Exam countdown'] },
+    { label: 'Type "contact"', keys: ['Department contacts'] },
+    { label: 'Type "credits"', keys: ['Credit structure'] },
+    { label: 'Type "library"', keys: ['Division Library page'] },
   ]
 
   const allNav = [...NAV, ...EXTRA_NAV]
@@ -204,6 +220,7 @@ function Shell() {
       <ScrollProgress />
       <ConsoleEasterEgg />
       <ClickParticles />
+      <EasterEggs />
 
       <div className="ticker">
         <div className="container">
@@ -268,6 +285,7 @@ function Shell() {
           {page === 'achievements' && <Achievements />}
           {page === 'gallery' && <Gallery />}
           {page === 'blog' && <Blog />}
+          {page === 'library' && <Library />}
           {page === 'logger' && <ActivityLogger onOpenAuth={() => openAuth('login')} />}
           {page === 'faq' && <FAQ />}
           {page === 'contact' && <Contact />}
@@ -338,6 +356,8 @@ function Shell() {
 
       <ScrollTop />
       <Mascot />
+      <EggHints />
+
       <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} commands={commands} />
       <ShortcutHelp open={helpOpen} onClose={() => setHelpOpen(false)} items={shortcuts} />
       <AuthModal open={authOpen} onClose={() => setAuthOpen(false)} initialMode={authMode} />

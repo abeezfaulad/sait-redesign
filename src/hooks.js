@@ -5,19 +5,31 @@ export function useLocalStorage(key, initial) {
     try {
       const raw = localStorage.getItem(key)
       return raw !== null ? JSON.parse(raw) : initial
-    } catch { return initial }
+    } catch {
+      return initial
+    }
   })
   useEffect(() => {
-    try { localStorage.setItem(key, JSON.stringify(value)) } catch {}
+    try {
+      localStorage.setItem(key, JSON.stringify(value))
+    } catch {}
   }, [key, value])
   return [value, setValue]
 }
 
 export function useHotkeys(map) {
   useEffect(() => {
+    let lastLetter = ''
+    let lastLetterAt = 0
+
     function onKey(e) {
       const tag = (e.target && e.target.tagName) || ''
-      const typing = tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || (e.target && e.target.isContentEditable)
+      const typing =
+        tag === 'INPUT' ||
+        tag === 'TEXTAREA' ||
+        tag === 'SELECT' ||
+        (e.target && e.target.isContentEditable)
+
       const mod = e.ctrlKey || e.metaKey
       const parts = []
       if (mod) parts.push('mod')
@@ -26,12 +38,32 @@ export function useHotkeys(map) {
       const k = e.key.length === 1 ? e.key.toLowerCase() : e.key
       if (!['Control', 'Meta', 'Shift', 'Alt'].includes(e.key)) parts.push(k)
       const combo = parts.join('+')
+
+      const isLetter = k.length === 1 && /[a-z]/.test(k)
+      const now = performance.now()
+      const recentLetter = isLetter && lastLetter !== '' && (now - lastLetterAt) < 400
+
       if (map[combo]) {
-        if (typing && !mod && combo !== 'escape') return
+        if (typing && !mod && combo !== 'escape') {
+          if (isLetter) { lastLetter = k; lastLetterAt = now }
+          return
+        }
+        // Do not start a g-sequence mid-word (prevents typing "cgpa" from
+        // firing "g then p" = navigate to People)
+        if (combo === 'g' && recentLetter) {
+          if (isLetter) { lastLetter = k; lastLetterAt = now }
+          return
+        }
         e.preventDefault()
         map[combo](e)
       }
+
+      if (isLetter) {
+        lastLetter = k
+        lastLetterAt = now
+      }
     }
+
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [map])
@@ -48,14 +80,16 @@ export function useQueryParam(key, initial) {
     if (value === initial) p.delete(key)
     else p.set(key, value)
     const qs = p.toString()
-    window.history.replaceState(null, '', window.location.pathname + (qs ? '?' + qs : '') + window.location.hash)
+    const next = window.location.pathname + (qs ? '?' + qs : '') + window.location.hash
+    window.history.replaceState(null, '', next)
   }, [key, value, initial])
   return [value, setValue]
 }
 
 export function useReducedMotion() {
   const [reduced, setReduced] = useState(() =>
-    typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    typeof window !== 'undefined' &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches
   )
   useEffect(() => {
     const m = window.matchMedia('(prefers-reduced-motion: reduce)')
