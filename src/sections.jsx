@@ -5,6 +5,10 @@ import { useEventCountdown, RegistrationModal } from './extras.jsx'
 import { Constellation, Marquee, Typewriter, MagneticButton, Parallax } from './fancy.jsx'
 import { useAuth } from './auth.jsx'
 import {
+  DailyQuote, WeatherWidget, OnlineCounter, AchievementsPanel,
+  WishWall, useGreeting,
+} from './widgets.jsx'
+import {
   STATS, QUICK_LINKS, FACULTY, EXEC, TEAMS,
   EVENT_CATEGORIES, UPCOMING_EVENTS, PAST_EVENTS,
   PLACEMENT_STATS, RECRUITERS, CAREER_RESOURCES,
@@ -17,6 +21,8 @@ import {
    HOME
    ============================================================ */
 export function Home({ onNavigate, onOpenPalette, onOpenAuth }) {
+  const greeting = useGreeting()
+
   return (
     <>
       <section className="hero" id="home">
@@ -30,7 +36,7 @@ export function Home({ onNavigate, onOpenPalette, onOpenAuth }) {
         <div className="container hero-inner">
           <span className="hero-eyebrow">
             <span className="hero-eyebrow-dot" />
-            CUSAT · Division of Information Technology
+            {greeting} · CUSAT · Division of Information Technology
           </span>
           <h1 className="display-xl">
             Students<br />
@@ -78,7 +84,21 @@ export function Home({ onNavigate, onOpenPalette, onOpenAuth }) {
         'Activity logger open', 'Department notices',
       ]} />
 
-      <Section id="quick" num="01" kicker="Start here" title="The four things students come here for.">
+      {/* ---------- DAILY WIDGETS ---------- */}
+      <Section id="daily" num="01" kicker="Today" title="A snapshot of the day.">
+        <div className="dash-row">
+          <DailyQuote />
+          <WeatherWidget />
+        </div>
+        <div style={{ marginTop: 16, display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+          <OnlineCounter />
+        </div>
+        <div style={{ marginTop: 24 }}>
+          <AchievementsPanel />
+        </div>
+      </Section>
+
+      <Section id="quick" num="02" kicker="Start here" title="The four things students come here for.">
         <div className="row-list">
           {QUICK_LINKS.map((l) => (
             <div className="row" key={l.label}>
@@ -92,12 +112,7 @@ export function Home({ onNavigate, onOpenPalette, onOpenAuth }) {
         </div>
       </Section>
 
-      <Section
-        id="what-we-do"
-        num="02"
-        kicker="What we do"
-        title="Four things SAIT does for the IT Division."
-      >
+      <Section id="what-we-do" num="03" kicker="What we do" title="Four things SAIT does for the IT Division.">
         <div className="home-grid-2">
           <div className="home-card">
             <div className="home-card-num">01</div>
@@ -138,12 +153,7 @@ export function Home({ onNavigate, onOpenPalette, onOpenAuth }) {
         </div>
       </Section>
 
-      <Section
-        id="home-notices"
-        num="03"
-        kicker="Latest"
-        title="Recent notices."
-      >
+      <Section id="home-notices" num="04" kicker="Latest" title="Recent notices.">
         <div className="row-list">
           {NOTIFICATIONS.slice(0, 4).map((n) => (
             <div className="row" key={n.title}>
@@ -163,12 +173,7 @@ export function Home({ onNavigate, onOpenPalette, onOpenAuth }) {
         </div>
       </Section>
 
-      <Section
-        id="home-events"
-        num="04"
-        kicker="Coming up"
-        title="Next on the calendar."
-      >
+      <Section id="home-events" num="05" kicker="Coming up" title="Next on the calendar.">
         <div className="row-list">
           {UPCOMING_EVENTS.slice(0, 3).map((e) => (
             <div className="row" key={e.title}>
@@ -188,12 +193,7 @@ export function Home({ onNavigate, onOpenPalette, onOpenAuth }) {
         </div>
       </Section>
 
-      <Section
-        id="why"
-        num="05"
-        kicker="Why SAIT"
-        title="What the association is actually for."
-      >
+      <Section id="why" num="06" kicker="Why SAIT" title="What the association is actually for.">
         <div className="cols">
           <div>
             <SubHead>For first years</SubHead>
@@ -231,6 +231,9 @@ export function Home({ onNavigate, onOpenPalette, onOpenAuth }) {
           </div>
         </div>
       </Section>
+
+      {/* ---------- WISH WALL ---------- */}
+      <WishWall />
     </>
   )
 }
@@ -260,7 +263,7 @@ const TIMELINE = [
   { year: '2003', event: 'First B.Tech IT batch graduates. Department grows to four faculty members.' },
   { year: '2008', event: 'Formal student body formed — coordinating committee for department events.' },
   { year: '2012', event: 'First HackIT. Twenty-two students across four teams participate.' },
-  { year: '2015', event: 'SAIT given official recognition as the division\'s student association.' },
+  { year: '2015', event: "SAIT given official recognition as the division's student association." },
   { year: '2018', event: 'Launch of InnoVIT project expo. Alumni network formally established.' },
   { year: '2021', event: 'First fully online HackIT during the pandemic. 82 teams from Kerala participate.' },
   { year: '2024', event: 'Alumni mentorship program begins. Placement cell and SAIT formalise collaboration.' },
@@ -283,18 +286,10 @@ export function About() {
       lede="The Division of Information Technology was established within the School of Engineering, CUSAT, to build strong foundations in computing, systems and software. SAIT is its student body.">
 
       <div className="about-tabs" role="tablist">
-        <button role="tab" data-active={tab === 'overview'} onClick={() => setTab('overview')}>
-          Overview
-        </button>
-        <button role="tab" data-active={tab === 'facilities'} onClick={() => setTab('facilities')}>
-          Facilities
-        </button>
-        <button role="tab" data-active={tab === 'curriculum'} onClick={() => setTab('curriculum')}>
-          Curriculum
-        </button>
-        <button role="tab" data-active={tab === 'history'} onClick={() => setTab('history')}>
-          History
-        </button>
+        <button role="tab" data-active={tab === 'overview'} onClick={() => setTab('overview')}>Overview</button>
+        <button role="tab" data-active={tab === 'facilities'} onClick={() => setTab('facilities')}>Facilities</button>
+        <button role="tab" data-active={tab === 'curriculum'} onClick={() => setTab('curriculum')}>Curriculum</button>
+        <button role="tab" data-active={tab === 'history'} onClick={() => setTab('history')}>History</button>
       </div>
 
       {tab === 'overview' && (
@@ -547,7 +542,13 @@ export function Events() {
   const countdown = useEventCountdown(nextEvent?.date || '')
 
   function toggleBookmark(title) {
-    setBookmarks((prev) => prev.includes(title) ? prev.filter((x) => x !== title) : [...prev, title])
+    setBookmarks((prev) => {
+      const has = prev.includes(title)
+      if (!has) {
+        try { window.dispatchEvent(new CustomEvent('sait:bookmark')) } catch {}
+      }
+      return has ? prev.filter((x) => x !== title) : [...prev, title]
+    })
   }
 
   return (
@@ -915,6 +916,7 @@ export function ActivityLogger({ onOpenAuth }) {
     }
     setActivities((prev) => [{ id: Date.now(), ...form, status: 'pending', points, who: user.name }, ...prev])
     toast.push({ title: 'Submitted for verification', body: `${form.title} · ${typeLabel(form.type)}` })
+    try { window.dispatchEvent(new CustomEvent('sait:logger')) } catch {}
     reset()
   }
 

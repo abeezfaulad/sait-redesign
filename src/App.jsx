@@ -14,6 +14,11 @@ import {
   useScrollReveal, useTilt, Grain, Splash, PageFade,
 } from './fancy.jsx'
 import { AuthProvider, AuthModal, UserMenu } from './auth.jsx'
+import {
+  AchievementsProvider, useAchievements, useGreeting,
+  Mascot, ConsoleEasterEgg, ClickParticles,
+  useKonami, KonamiOverlay, PomodoroTimer,
+} from './widgets.jsx'
 
 function Shell() {
   const [page, setPage] = useState('home')
@@ -22,17 +27,31 @@ function Shell() {
   const [helpOpen, setHelpOpen] = useState(false)
   const [authOpen, setAuthOpen] = useState(false)
   const [authMode, setAuthMode] = useState('login')
+  const [konamiOpen, setKonamiOpen] = useState(false)
   const [readNotices] = useLocalStorage('sait.notices.read', [])
   const [gPending, setGPending] = useState(false)
+
+  const greeting = useGreeting()
+  const { unlock } = useAchievements()
 
   useCounters(page)
   useScrollReveal([page])
   useTilt()
 
-  // Global ripple effect on buttons
+  useKonami(() => {
+    setKonamiOpen(true)
+    unlock('konami')
+  })
+
+  /* First visit badge */
+  useEffect(() => {
+    unlock('first-visit')
+  }, [unlock])
+
+  /* Global ripple effect */
   useEffect(() => {
     const onClick = (e) => {
-      const btn = e.target.closest('.btn, .nav-auth-btn, .dock-trigger, .filters button, .view-toggle button, .chip')
+      const btn = e.target.closest('.btn, .nav-auth-btn, .dock-trigger, .filters button, .view-toggle button, .chip, .reaction')
       if (!btn) return
       const rect = btn.getBoundingClientRect()
       const size = Math.max(rect.width, rect.height)
@@ -49,6 +68,37 @@ function Shell() {
     document.addEventListener('click', onClick)
     return () => document.removeEventListener('click', onClick)
   }, [])
+
+  /* Track pages for explorer achievement */
+  useEffect(() => {
+    const visited = new Set(JSON.parse(localStorage.getItem('sait.visited') || '[]'))
+    visited.add(page)
+    localStorage.setItem('sait.visited', JSON.stringify([...visited]))
+    if (visited.size >= 6) unlock('explorer')
+    const allPages = [...NAV.map((n) => n.id), ...EXTRA_NAV.map((n) => n.id), 'notifications']
+    if (allPages.every((p) => visited.has(p))) unlock('all-pages')
+  }, [page, unlock])
+
+  /* Theme achievement sync */
+  useEffect(() => {
+    const onTheme = (e) => unlock(e.detail.theme === 'dark' ? 'dark-mode' : 'light-mode')
+    window.addEventListener('sait:theme', onTheme)
+    return () => window.removeEventListener('sait:theme', onTheme)
+  }, [unlock])
+
+  /* Bookmark achievement */
+  useEffect(() => {
+    const onBookmark = () => unlock('bookmark')
+    window.addEventListener('sait:bookmark', onBookmark)
+    return () => window.removeEventListener('sait:bookmark', onBookmark)
+  }, [unlock])
+
+  /* Logger achievement */
+  useEffect(() => {
+    const onLogger = () => unlock('logger')
+    window.addEventListener('sait:logger', onLogger)
+    return () => window.removeEventListener('sait:logger', onLogger)
+  }, [unlock])
 
   const unreadNotices = Math.max(0, 4 - readNotices.length)
 
@@ -109,6 +159,7 @@ function Shell() {
 
     list.push({ id: 'action-logs', group: 'Actions', label: 'Open activity logger', hint: 'Action', run: () => navigate('logger') })
     list.push({ id: 'action-signin', group: 'Actions', label: 'Sign in / Create account', hint: 'Auth', run: () => openAuth('login') })
+    list.push({ id: 'action-wish', group: 'Actions', label: 'Open the wish wall', hint: 'Community', run: () => navigate('home') })
     list.push({ id: 'action-help', group: 'Actions', label: 'Show keyboard shortcuts', hint: '?', run: () => setHelpOpen(true) })
     return list
   }, [])
@@ -139,6 +190,7 @@ function Shell() {
     { label: 'Go to Events', keys: ['G', 'E'] },
     { label: 'Go to Logger', keys: ['G', 'L'] },
     { label: 'Go to Notices', keys: ['G', 'N'] },
+    { label: 'Konami code', keys: ['↑', '↑', '↓', '↓', '←', '→', '←', '→', 'B', 'A'] },
   ]
 
   const allNav = [...NAV, ...EXTRA_NAV]
@@ -150,6 +202,8 @@ function Shell() {
       <CursorGlow />
       <Spotlight />
       <ScrollProgress />
+      <ConsoleEasterEgg />
+      <ClickParticles />
 
       <div className="ticker">
         <div className="container">
@@ -271,16 +325,23 @@ function Shell() {
         </div>
       </footer>
 
+      <div className="pomo-floating">
+        <PomodoroTimer compact />
+      </div>
+
       <FloatingDock
         navigate={navigate}
         route={page}
         onOpenPalette={() => setPaletteOpen(true)}
         onOpenHelp={() => setHelpOpen(true)}
       />
+
       <ScrollTop />
+      <Mascot />
       <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} commands={commands} />
       <ShortcutHelp open={helpOpen} onClose={() => setHelpOpen(false)} items={shortcuts} />
       <AuthModal open={authOpen} onClose={() => setAuthOpen(false)} initialMode={authMode} />
+      <KonamiOverlay open={konamiOpen} onClose={() => setKonamiOpen(false)} />
     </>
   )
 }
@@ -290,7 +351,9 @@ export default function App() {
     <ThemeProvider>
       <AuthProvider>
         <ToastProvider>
-          <Shell />
+          <AchievementsProvider>
+            <Shell />
+          </AchievementsProvider>
         </ToastProvider>
       </AuthProvider>
     </ThemeProvider>
