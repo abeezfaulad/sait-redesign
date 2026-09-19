@@ -12,23 +12,24 @@ import {
   NOTIFICATIONS,
 } from './data.js'
 
-/* ============================================================
-   HOME
-   ============================================================ */
 export function Home({ onNavigate, onOpenPalette }) {
   return (
     <>
       <section className="hero" id="home">
         <div className="hero-bg" aria-hidden="true">
-          <div className="hero-orb hero-orb-1" />
-          <div className="hero-orb hero-orb-2" />
-          <div className="hero-orb hero-orb-3" />
           <div className="hero-grid" />
         </div>
         <Constellation />
         <div className="container hero-inner">
-          <span className="label">CUSAT · School of Engineering · Division of Information Technology</span>
-          <h1 className="display-xl">Students Association of Information&nbsp;Technology</h1>
+          <span className="hero-eyebrow">
+            <span className="hero-eyebrow-dot" />
+            CUSAT · Division of Information Technology
+          </span>
+          <h1 className="display-xl">
+            Students<br />
+            Association of<br />
+            <em>Information Technology</em>
+          </h1>
           <p className="lede">
             SAIT represents the students of the IT Division at CUSAT — running
             events, publishing notices, connecting students with industry, and
@@ -44,7 +45,7 @@ export function Home({ onNavigate, onOpenPalette }) {
           <div className="stat-row">
             {STATS.map((s) => (
               <div className="stat" key={s.key}>
-                <div className="value">{s.value}</div>
+                <div className="value">{s.value}{s.suffix}</div>
                 <div className="key">{s.key}</div>
               </div>
             ))}
@@ -53,14 +54,9 @@ export function Home({ onNavigate, onOpenPalette }) {
       </section>
 
       <Marquee items={[
-        'HackIT 2026',
-        'Registrations open',
-        'CodeFest',
-        'Placement season',
-        'InnoVIT',
-        'Alumni network',
-        'TechTalks',
-        'Workshops every month',
+        'HackIT 2026', 'Registrations open', 'CodeFest', 'Placement season',
+        'InnoVIT', 'Alumni network', 'TechTalks', 'Workshops every month',
+        'Activity logger open', 'Department notices',
       ]} />
 
       <Section id="quick" num="01" kicker="Start here" title="The four things students come here for.">
@@ -80,9 +76,6 @@ export function Home({ onNavigate, onOpenPalette }) {
   )
 }
 
-/* ============================================================
-   ABOUT
-   ============================================================ */
 const RESOURCES = [
   { title: 'B.Tech IT curriculum — 2022 scheme', note: 'Full course structure, credits, and electives for all eight semesters.' },
   { title: 'Academic calendar, Odd Semester 2026', note: 'Term dates, holidays, internal exam windows, and result publication dates.' },
@@ -163,15 +156,10 @@ export function About() {
   )
 }
 
-/* ============================================================
-   PEOPLE
-   ============================================================ */
 export function People() {
   const [q, setQ] = useState('')
   const needle = q.trim().toLowerCase()
-  const filter = (arr) => !needle ? arr : arr.filter((p) =>
-    (p.name + ' ' + p.role).toLowerCase().includes(needle)
-  )
+  const filter = (arr) => !needle ? arr : arr.filter((p) => (p.name + ' ' + p.role).toLowerCase().includes(needle))
   const exec = filter(EXEC)
   const facultyShown = filter(FACULTY)
 
@@ -232,9 +220,6 @@ export function People() {
   )
 }
 
-/* ============================================================
-   EVENTS
-   ============================================================ */
 function eventDateParts(d) {
   const m = d.match(/(\d+)\s+([A-Za-z]+)\s+(\d+)/)
   if (!m) return null
@@ -253,11 +238,7 @@ export function Events() {
     () => (filter === 'All' ? UPCOMING_EVENTS : UPCOMING_EVENTS.filter((e) => e.category === filter)),
     [filter]
   )
-
-  const pastWithDetails = useMemo(
-    () => PAST_EVENTS.map((e) => ({ ...e, kind: 'past' })),
-    []
-  )
+  const pastWithDetails = useMemo(() => PAST_EVENTS.map((e) => ({ ...e, kind: 'past' })), [])
 
   const nextEvent = upcoming[0]
   const countdown = useEventCountdown(nextEvent?.date || '')
@@ -279,22 +260,10 @@ export function Events() {
           <div className="countdown-title">{nextEvent.title}</div>
           <div className="countdown-meta">{nextEvent.date} · {nextEvent.time} · {nextEvent.venue}</div>
           <div className="countdown-grid">
-            <div className="countdown-cell">
-              <div className="countdown-value">{String(countdown.days).padStart(2, '0')}</div>
-              <div className="countdown-key">Days</div>
-            </div>
-            <div className="countdown-cell">
-              <div className="countdown-value">{String(countdown.hours).padStart(2, '0')}</div>
-              <div className="countdown-key">Hours</div>
-            </div>
-            <div className="countdown-cell">
-              <div className="countdown-value">{String(countdown.minutes).padStart(2, '0')}</div>
-              <div className="countdown-key">Minutes</div>
-            </div>
-            <div className="countdown-cell">
-              <div className="countdown-value">{String(countdown.seconds).padStart(2, '0')}</div>
-              <div className="countdown-key">Seconds</div>
-            </div>
+            <div className="countdown-cell"><div className="countdown-value">{String(countdown.days).padStart(2, '0')}</div><div className="countdown-key">Days</div></div>
+            <div className="countdown-cell"><div className="countdown-value">{String(countdown.hours).padStart(2, '0')}</div><div className="countdown-key">Hours</div></div>
+            <div className="countdown-cell"><div className="countdown-value">{String(countdown.minutes).padStart(2, '0')}</div><div className="countdown-key">Minutes</div></div>
+            <div className="countdown-cell"><div className="countdown-value">{String(countdown.seconds).padStart(2, '0')}</div><div className="countdown-key">Seconds</div></div>
           </div>
           <div className="countdown-actions">
             <button className="btn" onClick={() => setRegistering(nextEvent)}>Register now</button>
@@ -338,11 +307,8 @@ export function Events() {
                 </button>
                 <div className="event-side">
                   <span className="tag accent">{e.category}</span>
-                  <button
-                    className="bookmark-btn"
-                    onClick={() => toggleBookmark(e.title)}
-                    aria-label={saved ? 'Remove bookmark' : 'Save event'}
-                  >
+                  <button className="bookmark-btn" onClick={() => toggleBookmark(e.title)}
+                    aria-label={saved ? 'Remove bookmark' : 'Save event'}>
                     {saved ? '★' : '☆'}
                   </button>
                 </div>
@@ -376,9 +342,7 @@ export function Events() {
           <SubHead>Saved events ({bookmarks.length})</SubHead>
           <div className="filters" style={{ marginBottom: 12 }}>
             {bookmarks.map((title) => (
-              <button key={title} onClick={() => toggleBookmark(title)}>
-                {title} ×
-              </button>
+              <button key={title} onClick={() => toggleBookmark(title)}>{title} ×</button>
             ))}
           </div>
         </div>
@@ -419,23 +383,13 @@ export function Events() {
         eyebrow={active ? (active.kind === 'upcoming' ? 'Upcoming event' : 'Past event') : ''}
         title={active?.title || ''}
       >
-        {active && (
-          <EventDetail
-            event={active}
-            onRegister={() => { setActive(null); setRegistering(active) }}
-          />
-        )}
+        {active && <EventDetail event={active} onRegister={() => { setActive(null); setRegistering(active) }} />}
       </Drawer>
 
       <RegistrationModal
         event={registering}
         onClose={() => setRegistering(null)}
-        onConfirm={() => {
-          toast.push({
-            title: 'Registration confirmed',
-            body: `${registering?.title} · ${registering?.date}`,
-          })
-        }}
+        onConfirm={() => toast.push({ title: 'Registration confirmed', body: `${registering?.title} · ${registering?.date}` })}
       />
     </Section>
   )
@@ -447,66 +401,37 @@ function EventDetail({ event, onRegister }) {
   return (
     <div className="stack-32">
       <div className="detail-grid">
-        <div>
-          <div className="label">Date</div>
-          <div className="detail-value">{event.date}</div>
-        </div>
-        {event.time && (
-          <div>
-            <div className="label">Time</div>
-            <div className="detail-value">{event.time}</div>
-          </div>
-        )}
-        {event.venue && (
-          <div>
-            <div className="label">Venue</div>
-            <div className="detail-value">{event.venue}</div>
-          </div>
-        )}
-        {event.category && (
-          <div>
-            <div className="label">Category</div>
-            <div className="detail-value">{event.category}</div>
-          </div>
-        )}
+        <div><div className="label">Date</div><div className="detail-value">{event.date}</div></div>
+        {event.time && <div><div className="label">Time</div><div className="detail-value">{event.time}</div></div>}
+        {event.venue && <div><div className="label">Venue</div><div className="detail-value">{event.venue}</div></div>}
+        {event.category && <div><div className="label">Category</div><div className="detail-value">{event.category}</div></div>}
       </div>
-
       {event.note && <p className="muted">{event.note}</p>}
-
       {!isPast && (
         <>
           <div className="rule" />
           <div>
             <div className="label" style={{ marginBottom: 10 }}>Registration</div>
-            <p className="muted small">
-              Register through the department portal. Bring your college ID on the day.
-              Team events require all members to be registered together.
-            </p>
+            <p className="muted small">Register through the department portal. Bring your college ID on the day. Team events require all members to be registered together.</p>
           </div>
           <div className="detail-actions">
             <button className="btn" onClick={onRegister}>Register</button>
-            <button
-              className="btn ghost"
-              onClick={() => toast.push({
-                title: 'Added to calendar',
-                body: `${event.title} · ${event.date}`,
-                action: { label: 'Undo', onClick: () => toast.push({ title: 'Removed from calendar' }) },
-              })}
-            >
+            <button className="btn ghost" onClick={() => toast.push({
+              title: 'Added to calendar',
+              body: `${event.title} · ${event.date}`,
+              action: { label: 'Undo', onClick: () => toast.push({ title: 'Removed from calendar' }) },
+            })}>
               Add to calendar
             </button>
           </div>
         </>
       )}
-
       {isPast && (
         <>
           <div className="rule" />
           <div>
             <div className="label" style={{ marginBottom: 10 }}>Report</div>
-            <p className="muted small">
-              Photos and the event report will be published in the department archive.
-            </p>
+            <p className="muted small">Photos and the event report will be published in the department archive.</p>
           </div>
         </>
       )}
@@ -514,9 +439,6 @@ function EventDetail({ event, onRegister }) {
   )
 }
 
-/* ============================================================
-   PLACEMENTS
-   ============================================================ */
 export function Placements() {
   const toast = useToast()
   return (
@@ -525,33 +447,23 @@ export function Placements() {
       <div className="stat-row" style={{ marginTop: 0 }}>
         {PLACEMENT_STATS.map((s) => (
           <div className="stat" key={s.key}>
-            <div className="value">{s.value}</div>
+            <div className="value">{s.prefix || ''}{s.value}{s.suffix || ''}</div>
             <div className="key">{s.key}</div>
           </div>
         ))}
       </div>
-
       <div style={{ marginTop: 64 }}>
         <SubHead>Recruiters on campus</SubHead>
         <div className="chip-cloud">
-          {RECRUITERS.map((r) => (
-            <span className="chip" key={r}>{r}</span>
-          ))}
+          {RECRUITERS.map((r) => <span className="chip" key={r}>{r}</span>)}
         </div>
       </div>
-
       <div style={{ marginTop: 56 }}>
         <SubHead>Resources</SubHead>
         <div className="row-list">
           {CAREER_RESOURCES.map((r) => (
-            <button
-              className="row row-btn"
-              key={r.label}
-              onClick={() => toast.push({
-                title: 'Opening resource',
-                body: `${r.label} — prototype only.`,
-              })}
-            >
+            <button className="row row-btn" key={r.label}
+              onClick={() => toast.push({ title: 'Opening resource', body: `${r.label} — prototype only.` })}>
               <span className="row-date">Document</span>
               <span className="row-title">{r.label}</span>
               <span className="row-meta"><ArrowLink>Open</ArrowLink></span>
@@ -563,9 +475,6 @@ export function Placements() {
   )
 }
 
-/* ============================================================
-   ALUMNI
-   ============================================================ */
 export function Alumni() {
   const [q, setQ] = useState('')
   const [year, setYear] = useState('All')
@@ -573,7 +482,6 @@ export function Alumni() {
     const set = new Set(ALUMNI.map((a) => a.year))
     return ['All', ...Array.from(set).sort((a, b) => b - a)]
   }, [])
-
   const list = useMemo(() => {
     const needle = q.trim().toLowerCase()
     return ALUMNI.filter((a) => {
@@ -596,7 +504,6 @@ export function Alumni() {
         </div>
         <SearchInput value={q} onChange={setQ} placeholder="Search alumni…" label="Search alumni" />
       </div>
-
       {list.length === 0 ? (
         <Empty>No alumni match the current filter.</Empty>
       ) : (
@@ -617,19 +524,13 @@ export function Alumni() {
   )
 }
 
-/* ============================================================
-   ACHIEVEMENTS
-   ============================================================ */
 export function Achievements() {
   const [q, setQ] = useState('')
   const filtered = useMemo(() => {
     const needle = q.trim().toLowerCase()
     if (!needle) return ACHIEVEMENTS
-    return ACHIEVEMENTS.filter((a) =>
-      (a.title + ' ' + a.who + ' ' + a.year).toLowerCase().includes(needle)
-    )
+    return ACHIEVEMENTS.filter((a) => (a.title + ' ' + a.who + ' ' + a.year).toLowerCase().includes(needle))
   }, [q])
-
   const grouped = useMemo(() => {
     const m = new Map()
     for (const a of filtered) {
@@ -645,14 +546,10 @@ export function Achievements() {
       <div className="search-row">
         <SearchInput value={q} onChange={setQ} placeholder="Search by title, student, or year…" label="Search achievements" />
       </div>
-
       {grouped.length === 0 && <Empty>Nothing matches "{q}".</Empty>}
-
       {grouped.map(([year, items]) => (
         <div key={year} className="year-block">
-          <div className="year-rail">
-            <span className="year">{year}</span>
-          </div>
+          <div className="year-rail"><span className="year">{year}</span></div>
           <div className="year-items">
             {items.map((a) => (
               <div className="achievement" key={a.title}>
@@ -667,9 +564,6 @@ export function Achievements() {
   )
 }
 
-/* ============================================================
-   ACTIVITY LOGGER
-   ============================================================ */
 export function ActivityLogger() {
   const toast = useToast()
   const [activities, setActivities] = useLocalStorage('sait.activities', SEED_ACTIVITIES)
@@ -684,11 +578,7 @@ export function ActivityLogger() {
   )
   const totals = useMemo(() => {
     const verified = activities.filter((a) => a.status === 'verified')
-    return {
-      logged: activities.length,
-      verified: verified.length,
-      points: verified.reduce((s, a) => s + a.points, 0),
-    }
+    return { logged: activities.length, verified: verified.length, points: verified.reduce((s, a) => s + a.points, 0) }
   }, [activities])
 
   function reset() {
@@ -700,32 +590,20 @@ export function ActivityLogger() {
     e.preventDefault()
     if (!form.title || !form.date || !form.role) return
     const points = ACTIVITY_TYPES.find((t) => t.id === form.type)?.points ?? 10
-
     if (editingId != null) {
-      setActivities((prev) => prev.map((a) =>
-        a.id === editingId ? { ...a, ...form, points } : a
-      ))
+      setActivities((prev) => prev.map((a) => (a.id === editingId ? { ...a, ...form, points } : a)))
       toast.push({ title: 'Activity updated' })
       reset()
       return
     }
-
-    setActivities((prev) => [
-      { id: Date.now(), ...form, status: 'pending', points, who: 'You' },
-      ...prev,
-    ])
-    toast.push({
-      title: 'Submitted for verification',
-      body: `${form.title} · ${typeLabel(form.type)}`,
-    })
+    setActivities((prev) => [{ id: Date.now(), ...form, status: 'pending', points, who: 'You' }, ...prev])
+    toast.push({ title: 'Submitted for verification', body: `${form.title} · ${typeLabel(form.type)}` })
     reset()
   }
 
   function edit(a) {
     setEditingId(a.id)
-    setForm({
-      title: a.title, date: a.date, type: a.type, role: a.role, proof: a.proof || '',
-    })
+    setForm({ title: a.title, date: a.date, type: a.type, role: a.role, proof: a.proof || '' })
     window.scrollTo({ top: document.getElementById('logger')?.offsetTop ?? 0, behavior: 'smooth' })
   }
 
@@ -734,13 +612,7 @@ export function ActivityLogger() {
     toast.push({
       title: 'Activity removed',
       body: a.title,
-      action: {
-        label: 'Undo',
-        onClick: () => {
-          setActivities((prev) => [a, ...prev])
-          toast.push({ title: 'Restored' })
-        },
-      },
+      action: { label: 'Undo', onClick: () => { setActivities((prev) => [a, ...prev]); toast.push({ title: 'Restored' }) } },
     })
   }
 
@@ -765,75 +637,50 @@ export function ActivityLogger() {
       lede="Submit hackathons, workshops, publications, internships and other activities. Verified entries appear on your profile and count towards the department leaderboard.">
       <div className="cols wide-left">
         <div>
-          <SubHead action={editingId && (
-            <button className="inline-cancel" onClick={reset}>Cancel edit</button>
-          )}>
+          <SubHead action={editingId && (<button className="inline-cancel" onClick={reset}>Cancel edit</button>)}>
             {editingId ? 'Edit activity' : 'Submit an activity'}
           </SubHead>
           <form className="form" onSubmit={submit}>
             <div className="field">
               <label htmlFor="al-title">Activity title</label>
-              <input id="al-title" value={form.title}
-                onChange={(e) => setForm({ ...form, title: e.target.value })}
-                placeholder="e.g. HackIT 2026 — 2nd place" required />
+              <input id="al-title" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="e.g. HackIT 2026 — 2nd place" required />
             </div>
             <div className="field-row">
               <div className="field">
                 <label htmlFor="al-date">Date</label>
-                <input id="al-date" type="date" value={form.date}
-                  onChange={(e) => setForm({ ...form, date: e.target.value })} required />
+                <input id="al-date" type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} required />
               </div>
               <div className="field">
                 <label htmlFor="al-type">Type</label>
-                <select id="al-type" value={form.type}
-                  onChange={(e) => setForm({ ...form, type: e.target.value })}>
-                  {ACTIVITY_TYPES.map((t) => (
-                    <option key={t.id} value={t.id}>{t.label} · {t.points} pts</option>
-                  ))}
+                <select id="al-type" value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })}>
+                  {ACTIVITY_TYPES.map((t) => <option key={t.id} value={t.id}>{t.label} · {t.points} pts</option>)}
                 </select>
               </div>
             </div>
             <div className="field">
               <label htmlFor="al-role">Your role</label>
-              <input id="al-role" value={form.role}
-                onChange={(e) => setForm({ ...form, role: e.target.value })}
-                placeholder="e.g. Team lead, Participant, Co-author" required />
+              <input id="al-role" value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })} placeholder="e.g. Team lead, Participant, Co-author" required />
             </div>
             <div className="field">
               <label htmlFor="al-proof">Proof link (optional)</label>
-              <input id="al-proof" value={form.proof}
-                onChange={(e) => setForm({ ...form, proof: e.target.value })}
-                placeholder="Certificate URL, repository, or Drive link" />
+              <input id="al-proof" value={form.proof} onChange={(e) => setForm({ ...form, proof: e.target.value })} placeholder="Certificate URL, repository, or Drive link" />
             </div>
             <div className="form-actions">
-              <button className="btn" type="submit">
-                {editingId ? 'Save changes' : 'Submit for verification'}
-              </button>
+              <button className="btn" type="submit">{editingId ? 'Save changes' : 'Submit for verification'}</button>
               <span className="form-hint"><Kbd>Enter</Kbd> to submit</span>
             </div>
           </form>
         </div>
-
         <div>
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 12 }}>
             <button className="btn ghost" onClick={exportCsv}>Export CSV</button>
           </div>
           <SubHead>Your dashboard</SubHead>
           <div className="stat-row" style={{ marginTop: 0, gridTemplateColumns: 'repeat(3, 1fr)' }}>
-            <div className="stat">
-              <div className="value" style={{ fontSize: '2rem' }}>{totals.logged}</div>
-              <div className="key">Logged</div>
-            </div>
-            <div className="stat">
-              <div className="value" style={{ fontSize: '2rem' }}>{totals.verified}</div>
-              <div className="key">Verified</div>
-            </div>
-            <div className="stat">
-              <div className="value" style={{ fontSize: '2rem' }}>{totals.points}</div>
-              <div className="key">Points</div>
-            </div>
+            <div className="stat"><div className="value" style={{ fontSize: '2rem' }}>{totals.logged}</div><div className="key">Logged</div></div>
+            <div className="stat"><div className="value" style={{ fontSize: '2rem' }}>{totals.verified}</div><div className="key">Verified</div></div>
+            <div className="stat"><div className="value" style={{ fontSize: '2rem' }}>{totals.points}</div><div className="key">Points</div></div>
           </div>
-
           <div className="filters" style={{ marginTop: 40 }}>
             {['All', ...ACTIVITY_TYPES.map((t) => t.id)].map((t) => (
               <button key={t} data-active={typeFilter === t} onClick={() => setTypeFilter(t)}>
@@ -841,7 +688,6 @@ export function ActivityLogger() {
               </button>
             ))}
           </div>
-
           <div className="row-list" style={{ borderTop: 0, marginTop: 8 }}>
             {filtered.length === 0 && <Empty>No activities in this category.</Empty>}
             {filtered.map((a) => (
@@ -865,10 +711,7 @@ export function ActivityLogger() {
           </div>
         </div>
       </div>
-
-      <div style={{ marginTop: 72 }}>
-        <Leaderboard />
-      </div>
+      <div style={{ marginTop: 72 }}><Leaderboard /></div>
     </Section>
   )
 }
@@ -893,7 +736,6 @@ function Leaderboard() {
     if (sortKey === k) setDir((d) => (d === 'asc' ? 'desc' : 'asc'))
     else { setSortKey(k); setDir(k === 'points' ? 'desc' : 'asc') }
   }
-
   const indicator = (k) => sortKey === k ? (dir === 'asc' ? ' ↑' : ' ↓') : ''
 
   return (
@@ -903,16 +745,8 @@ function Leaderboard() {
         <thead>
           <tr>
             <th style={{ width: 60 }}>#</th>
-            <th>
-              <button className="th-btn" onClick={() => toggle('name')}>
-                Student{indicator('name')}
-              </button>
-            </th>
-            <th style={{ textAlign: 'right' }}>
-              <button className="th-btn" onClick={() => toggle('points')}>
-                Points{indicator('points')}
-              </button>
-            </th>
+            <th><button className="th-btn" onClick={() => toggle('name')}>Student{indicator('name')}</button></th>
+            <th style={{ textAlign: 'right' }}><button className="th-btn" onClick={() => toggle('points')}>Points{indicator('points')}</button></th>
           </tr>
         </thead>
         <tbody>
@@ -929,19 +763,12 @@ function Leaderboard() {
   )
 }
 
-/* ============================================================
-   NOTIFICATIONS
-   ============================================================ */
 export function Notifications() {
   const [open, setOpen] = useState(0)
   const [read, setRead] = useLocalStorage('sait.notices.read', [])
-
-  function toggleRead(idx) {
-    setRead((prev) => prev.includes(idx) ? prev.filter((x) => x !== idx) : [...prev, idx])
-  }
-  function markAllRead() { setRead(NOTIFICATIONS.map((_, i) => i)) }
-  function markAllUnread() { setRead([]) }
-
+  const toggleRead = (idx) => setRead((prev) => prev.includes(idx) ? prev.filter((x) => x !== idx) : [...prev, idx])
+  const markAllRead = () => setRead(NOTIFICATIONS.map((_, i) => i))
+  const markAllUnread = () => setRead([])
   const unread = NOTIFICATIONS.length - read.length
 
   return (
@@ -970,11 +797,8 @@ export function Notifications() {
                   </div>
                   <span className="acc-plus" aria-hidden="true">+</span>
                 </button>
-                <button
-                  className="acc-read-toggle"
-                  onClick={() => toggleRead(i)}
-                  aria-label={isRead ? 'Mark unread' : 'Mark read'}
-                >
+                <button className="acc-read-toggle" onClick={() => toggleRead(i)}
+                  aria-label={isRead ? 'Mark unread' : 'Mark read'}>
                   {isRead ? 'Unread' : 'Read'}
                 </button>
               </div>

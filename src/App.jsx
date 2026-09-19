@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react'
-import { NAV, NOTICE, UPCOMING_EVENTS, ALUMNI, EXEC } from './data.js'
+import { NAV, EXTRA_NAV, NOTICE, UPCOMING_EVENTS, ALUMNI, EXEC } from './data.js'
 import {
   Home, About, People, Events, Placements,
   Alumni, Achievements, ActivityLogger, Notifications,
@@ -9,6 +9,10 @@ import { ToastProvider, ShortcutHelp, Kbd } from './ui.jsx'
 import { useHotkeys, useLocalStorage } from './hooks.js'
 import CommandPalette from './CommandPalette.jsx'
 import { ThemeProvider, ScrollProgress, FloatingDock, useCounters } from './panel.jsx'
+import {
+  CursorGlow, Spotlight, ScrollTop,
+  useScrollReveal, useTilt, Grain, Splash,
+} from './fancy.jsx'
 
 function Shell() {
   const [page, setPage] = useState('home')
@@ -19,13 +23,15 @@ function Shell() {
   const [gPending, setGPending] = useState(false)
 
   useCounters(page)
+  useScrollReveal([page])
+  useTilt()
 
   const unreadNotices = Math.max(0, 4 - readNotices.length)
 
   useEffect(() => {
     const fromHash = () => {
       const h = window.location.hash.replace('#', '')
-      const known = [...NAV.map((n) => n.id), 'gallery', 'blog', 'faq', 'contact', 'notifications']
+      const known = [...NAV.map((n) => n.id), ...EXTRA_NAV.map((n) => n.id), 'notifications']
       if (known.includes(h)) setPage(h || 'home')
     }
     fromHash()
@@ -43,10 +49,8 @@ function Shell() {
   const commands = useMemo(() => {
     const list = []
     const pg = (id, label, keywords) => list.push({
-      id: 'page-' + id, group: 'Pages', label, hint: 'Page', keywords,
-      run: () => navigate(id),
+      id: 'page-' + id, group: 'Pages', label, hint: 'Page', keywords, run: () => navigate(id),
     })
-
     pg('home', 'Home', 'landing start')
     pg('about', 'About the department', 'vision mission history faculty')
     pg('people', 'Association & people', 'committee members teams')
@@ -65,26 +69,17 @@ function Shell() {
       id: 'event-' + e.title, group: 'Events', label: e.title, hint: e.date,
       keywords: e.category + ' ' + e.venue, run: () => navigate('events'),
     }))
-
     EXEC.slice(0, 6).forEach((p) => list.push({
       id: 'person-' + p.name, group: 'People', label: p.name, hint: p.role,
       keywords: 'committee executive', run: () => navigate('people'),
     }))
-
     ALUMNI.slice(0, 4).forEach((a) => list.push({
       id: 'alum-' + a.name, group: 'Alumni', label: a.name, hint: `Class of ${a.year}`,
       keywords: a.role, run: () => navigate('alumni'),
     }))
 
-    list.push({
-      id: 'action-logs', group: 'Actions', label: 'Open activity logger', hint: 'Action',
-      run: () => navigate('logger'),
-    })
-    list.push({
-      id: 'action-help', group: 'Actions', label: 'Show keyboard shortcuts', hint: '?',
-      run: () => setHelpOpen(true),
-    })
-
+    list.push({ id: 'action-logs', group: 'Actions', label: 'Open activity logger', hint: 'Action', run: () => navigate('logger') })
+    list.push({ id: 'action-help', group: 'Actions', label: 'Show keyboard shortcuts', hint: '?', run: () => setHelpOpen(true) })
     return list
   }, [])
 
@@ -116,8 +111,14 @@ function Shell() {
     { label: 'Go to Notices', keys: ['G', 'N'] },
   ]
 
+  const allNav = [...NAV, ...EXTRA_NAV]
+
   return (
     <>
+      <Splash />
+      <Grain />
+      <CursorGlow />
+      <Spotlight />
       <ScrollProgress />
 
       <div className="ticker">
@@ -131,24 +132,26 @@ function Shell() {
 
       <header className="nav">
         <div className="container nav-inner">
-          <button className="wordmark" onClick={() => navigate('home')} style={{ background: 'none', border: 0, padding: 0 }}>
+          <button className="wordmark" onClick={() => navigate('home')}>
             SAIT <small>CUSAT · IT Division</small>
           </button>
-
           <nav className="nav-links">
             {NAV.map((n) => (
               <button key={n.id} data-active={page === n.id} onClick={() => navigate(n.id)}>{n.label}</button>
             ))}
-            <button data-active={page === 'gallery'} onClick={() => navigate('gallery')}>Gallery</button>
-            <button data-active={page === 'blog'} onClick={() => navigate('blog')}>News</button>
-            <button data-active={page === 'faq'} onClick={() => navigate('faq')}>FAQ</button>
-            <button data-active={page === 'contact'} onClick={() => navigate('contact')}>Contact</button>
+            <div className="nav-more">
+              <button data-active={EXTRA_NAV.some((n) => n.id === page)}>More ▾</button>
+              <div className="nav-more-menu">
+                {EXTRA_NAV.map((n) => (
+                  <button key={n.id} data-active={page === n.id} onClick={() => navigate(n.id)}>{n.label}</button>
+                ))}
+              </div>
+            </div>
             <button data-active={page === 'notifications'} onClick={() => navigate('notifications')} className="nav-notices">
               Notices
               {unreadNotices > 0 && <span className="badge">{unreadNotices}</span>}
             </button>
           </nav>
-
           <div className="nav-right">
             <button className="palette-trigger" onClick={() => setPaletteOpen(true)} aria-label="Open command palette">
               <span>Search</span>
@@ -159,16 +162,9 @@ function Shell() {
             </button>
           </div>
         </div>
-
         {menuOpen && (
           <div className="container nav-mobile">
-            {[...NAV,
-              { id: 'gallery', label: 'Gallery' },
-              { id: 'blog', label: 'News' },
-              { id: 'faq', label: 'FAQ' },
-              { id: 'contact', label: 'Contact' },
-              { id: 'notifications', label: 'Notices' },
-            ].map((n) => (
+            {[...allNav, { id: 'notifications', label: 'Notices' }].map((n) => (
               <button key={n.id} data-active={page === n.id} onClick={() => navigate(n.id)}>{n.label}</button>
             ))}
           </div>
@@ -191,7 +187,7 @@ function Shell() {
         {page === 'notifications' && <Notifications />}
       </main>
 
-      <footer className="footer" id="contact">
+      <footer className="footer">
         <div className="container">
           <div className="footer-grid">
             <div>
@@ -209,13 +205,9 @@ function Shell() {
             <div>
               <span className="label">Navigate</span>
               <div className="footer-links" style={{ marginTop: 14 }}>
-                {NAV.map((n) => (
+                {allNav.map((n) => (
                   <a key={n.id} href={`#${n.id}`} onClick={(e) => { e.preventDefault(); navigate(n.id) }}>{n.label}</a>
                 ))}
-                <a href="#gallery" onClick={(e) => { e.preventDefault(); navigate('gallery') }}>Gallery</a>
-                <a href="#blog" onClick={(e) => { e.preventDefault(); navigate('blog') }}>News</a>
-                <a href="#faq" onClick={(e) => { e.preventDefault(); navigate('faq') }}>FAQ</a>
-                <a href="#contact" onClick={(e) => { e.preventDefault(); navigate('contact') }}>Contact</a>
                 <a href="#notifications" onClick={(e) => { e.preventDefault(); navigate('notifications') }}>Notices</a>
               </div>
             </div>
@@ -251,7 +243,7 @@ function Shell() {
         onOpenPalette={() => setPaletteOpen(true)}
         onOpenHelp={() => setHelpOpen(true)}
       />
-
+      <ScrollTop />
       <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} commands={commands} />
       <ShortcutHelp open={helpOpen} onClose={() => setHelpOpen(false)} items={shortcuts} />
     </>

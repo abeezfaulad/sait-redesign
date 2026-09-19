@@ -5,14 +5,10 @@ export function useLocalStorage(key, initial) {
     try {
       const raw = localStorage.getItem(key)
       return raw !== null ? JSON.parse(raw) : initial
-    } catch {
-      return initial
-    }
+    } catch { return initial }
   })
   useEffect(() => {
-    try {
-      localStorage.setItem(key, JSON.stringify(value))
-    } catch {}
+    try { localStorage.setItem(key, JSON.stringify(value)) } catch {}
   }, [key, value])
   return [value, setValue]
 }
@@ -52,8 +48,7 @@ export function useQueryParam(key, initial) {
     if (value === initial) p.delete(key)
     else p.set(key, value)
     const qs = p.toString()
-    const next = window.location.pathname + (qs ? '?' + qs : '') + window.location.hash
-    window.history.replaceState(null, '', next)
+    window.history.replaceState(null, '', window.location.pathname + (qs ? '?' + qs : '') + window.location.hash)
   }, [key, value, initial])
   return [value, setValue]
 }
