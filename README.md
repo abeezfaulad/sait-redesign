@@ -7,7 +7,7 @@ This is a frontend prototype built for the **SAIT Website Redesign Challenge 202
 ## Live Demos
 
 * **GitHub Pages:** [https://abeezfaulad.github.io/sait-redesign/](https://abeezfaulad.github.io/sait-redesign/)
-* **Vercel:** [https://siat-redesign.vercel.app/](https://siat-redesign.vercel.app/)
+* **Vercel:** [https://sait-redesign.vercel.app/](https://sait-redesign.vercel.app/)
 
 ---
 
