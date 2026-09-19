@@ -12,6 +12,7 @@ export const NAV = [
 export const EXTRA_NAV = [
   { id: 'gallery', label: 'Gallery' },
   { id: 'blog', label: 'News' },
+  { id: 'library', label: 'Library' },
   { id: 'faq', label: 'FAQ' },
   { id: 'contact', label: 'Contact' },
 ]

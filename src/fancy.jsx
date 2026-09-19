@@ -1,6 +1,9 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react'
 import { useReducedMotion } from './hooks.js'
 
+/* ============================================================
+   Cursor glow
+   ============================================================ */
 export function CursorGlow() {
   const ref = useRef(null)
   const reduced = useReducedMotion()
@@ -35,6 +38,9 @@ export function CursorGlow() {
   return <div ref={ref} className="cursor-glow" aria-hidden="true" />
 }
 
+/* ============================================================
+   Spotlight
+   ============================================================ */
 export function Spotlight() {
   const ref = useRef(null)
   const reduced = useReducedMotion()
@@ -59,6 +65,9 @@ export function Spotlight() {
   return <div ref={ref} className="spotlight" aria-hidden="true" />
 }
 
+/* ============================================================
+   Constellation canvas
+   ============================================================ */
 export function Constellation() {
   const ref = useRef(null)
   const reduced = useReducedMotion()
@@ -134,6 +143,9 @@ export function Constellation() {
   return <canvas ref={ref} className="constellation" aria-hidden="true" />
 }
 
+/* ============================================================
+   Scroll reveal
+   ============================================================ */
 export function useScrollReveal(deps = []) {
   useEffect(() => {
     const els = document.querySelectorAll(
@@ -160,6 +172,9 @@ export function useScrollReveal(deps = []) {
   }, deps)
 }
 
+/* ============================================================
+   Tilt
+   ============================================================ */
 export function useTilt() {
   useEffect(() => {
     if (window.matchMedia('(hover: none)').matches) return
@@ -187,6 +202,9 @@ export function useTilt() {
   }, [])
 }
 
+/* ============================================================
+   Marquee
+   ============================================================ */
 export function Marquee({ items }) {
   return (
     <div className="marquee" aria-hidden="true">
@@ -201,10 +219,16 @@ export function Marquee({ items }) {
   )
 }
 
+/* ============================================================
+   Grain
+   ============================================================ */
 export function Grain() {
   return <div className="grain" aria-hidden="true" />
 }
 
+/* ============================================================
+   Splash
+   ============================================================ */
 export function Splash({ duration = 900 }) {
   const [gone, setGone] = useState(false)
   useEffect(() => {
@@ -221,6 +245,9 @@ export function Splash({ duration = 900 }) {
   )
 }
 
+/* ============================================================
+   Scroll to top
+   ============================================================ */
 export function ScrollTop() {
   const [show, setShow] = useState(false)
   useEffect(() => {
@@ -239,12 +266,12 @@ export function ScrollTop() {
       <span className="scroll-top-label">Top</span>
     </button>
   )
-  
 }
+
 /* ============================================================
-   Typewriter — cycles through phrases with a blinking caret
+   Typewriter
    ============================================================ */
-export function Typewriter({ phrases, speed = 55, pause = 1800, className = '' }) {
+export function Typewriter({ phrases, speed = 55, pause = 1800 }) {
   const [i, setI] = useState(0)
   const [text, setText] = useState('')
   const [deleting, setDeleting] = useState(false)
@@ -268,47 +295,15 @@ export function Typewriter({ phrases, speed = 55, pause = 1800, className = '' }
   }, [text, deleting, i, phrases, speed, pause])
 
   return (
-    <span className={className}>
+    <>
       {text}
       <span className="typewriter-caret" aria-hidden="true">|</span>
-    </span>
+    </>
   )
 }
 
 /* ============================================================
-   ScrambleText — hovers scramble letters then resolve
-   ============================================================ */
-export function ScrambleText({ children, className = '' }) {
-  const [display, setDisplay] = useState(children)
-  const chars = '!<>-_\\/[]{}—=+*^?#01'
-
-  function scramble() {
-    let iter = 0
-    const original = children
-    const id = setInterval(() => {
-      setDisplay(
-        original.split('').map((_, i) => {
-          if (i < iter) return original[i]
-          return chars[Math.floor(Math.random() * chars.length)]
-        }).join('')
-      )
-      iter += 1 / 2
-      if (iter >= original.length) {
-        clearInterval(id)
-        setDisplay(original)
-      }
-    }, 32)
-  }
-
-  return (
-    <span className={className} onMouseEnter={scramble} style={{ display: 'inline-block' }}>
-      {display}
-    </span>
-  )
-}
-
-/* ============================================================
-   MagneticButton — follows pointer slightly
+   Magnetic button
    ============================================================ */
 export function MagneticButton({ children, className = '', strength = 0.35, ...rest }) {
   const ref = useRef(null)
@@ -318,15 +313,6 @@ export function MagneticButton({ children, className = '', strength = 0.35, ...r
     const el = ref.current
     if (!el) return
     let raf = 0, tx = 0, ty = 0, cx = 0, cy = 0
-    const onMove = (e) => {
-      const r = el.getBoundingClientRect()
-      const px = e.clientX - (r.left + r.width / 2)
-      const py = e.clientY - (r.top + r.height / 2)
-      tx = px * strength
-      ty = py * strength
-      if (!raf) raf = requestAnimationFrame(tick)
-    }
-    const onLeave = () => { tx = 0; ty = 0; if (!raf) raf = requestAnimationFrame(tick) }
     const tick = () => {
       cx += (tx - cx) * 0.2
       cy += (ty - cy) * 0.2
@@ -334,6 +320,13 @@ export function MagneticButton({ children, className = '', strength = 0.35, ...r
       if (Math.abs(tx - cx) > 0.2 || Math.abs(ty - cy) > 0.2) raf = requestAnimationFrame(tick)
       else raf = 0
     }
+    const onMove = (e) => {
+      const r = el.getBoundingClientRect()
+      tx = (e.clientX - (r.left + r.width / 2)) * strength
+      ty = (e.clientY - (r.top + r.height / 2)) * strength
+      if (!raf) raf = requestAnimationFrame(tick)
+    }
+    const onLeave = () => { tx = 0; ty = 0; if (!raf) raf = requestAnimationFrame(tick) }
     el.addEventListener('mousemove', onMove)
     el.addEventListener('mouseleave', onLeave)
     return () => {
@@ -351,27 +344,7 @@ export function MagneticButton({ children, className = '', strength = 0.35, ...r
 }
 
 /* ============================================================
-   Ripple — attach onClick ripple to any element
-   ============================================================ */
-export function useRipple() {
-  return useCallback((e) => {
-    const el = e.currentTarget
-    const rect = el.getBoundingClientRect()
-    const size = Math.max(rect.width, rect.height)
-    const x = e.clientX - rect.left - size / 2
-    const y = e.clientY - rect.top - size / 2
-    const ripple = document.createElement('span')
-    ripple.className = 'ripple'
-    ripple.style.width = ripple.style.height = size + 'px'
-    ripple.style.left = x + 'px'
-    ripple.style.top = y + 'px'
-    el.appendChild(ripple)
-    setTimeout(() => ripple.remove(), 700)
-  }, [])
-}
-
-/* ============================================================
-   Parallax — moves children based on scroll
+   Parallax
    ============================================================ */
 export function Parallax({ children, speed = 0.15, className = '' }) {
   const ref = useRef(null)
@@ -405,7 +378,7 @@ export function Parallax({ children, speed = 0.15, className = '' }) {
 }
 
 /* ============================================================
-   Confetti — burst on success
+   Confetti
    ============================================================ */
 export function useConfetti() {
   return useCallback((count = 40) => {
@@ -428,7 +401,7 @@ export function useConfetti() {
 }
 
 /* ============================================================
-   Page transition wrapper
+   Page fade transition
    ============================================================ */
 export function PageFade({ children, pageKey }) {
   const [key, setKey] = useState(pageKey)

@@ -98,6 +98,11 @@ export function useReducedMotion() {
   return reduced
 }
 
+/* ============================================================
+   useDevice
+   Returns: { touch, mobile, tablet, desktop, width }
+   Also sets data-device and data-layout on <html>
+   ============================================================ */
 export function useDevice() {
   const read = () => {
     if (typeof window === 'undefined') {
