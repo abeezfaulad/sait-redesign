@@ -45,9 +45,10 @@ export function Home({ onNavigate, onOpenPalette, onOpenAuth }) {
             </em>
           </h1>
           <p className="lede">
-            SAIT represents the students of the IT Division at CUSAT — running
-            events, publishing notices, connecting students with industry, and
-            keeping a record of what this department's students build.
+            SAIT is the elected student body of the IT Division at the School of
+            Engineering, CUSAT. We run technical events, publish department notices,
+            connect students with industry, and keep an open record of everything
+            this department's students build.
           </p>
           <div className="hero-actions">
             <MagneticButton className="btn" onClick={() => onNavigate('events')}>
@@ -90,6 +91,146 @@ export function Home({ onNavigate, onOpenPalette, onOpenAuth }) {
           ))}
         </div>
       </Section>
+
+      <Section
+        id="what-we-do"
+        num="02"
+        kicker="What we do"
+        title="Four things SAIT does for the IT Division."
+      >
+        <div className="home-grid-2">
+          <div className="home-card">
+            <div className="home-card-num">01</div>
+            <div className="home-card-title">Run the events calendar</div>
+            <p className="home-card-body">
+              From HackIT — our 24-hour annual hackathon — to monthly workshops, industry
+              TechTalks, CodeFest, and the InnoVIT project expo. Over 30 events a year,
+              all open to students of the division.
+            </p>
+          </div>
+          <div className="home-card">
+            <div className="home-card-num">02</div>
+            <div className="home-card-title">Keep an open record</div>
+            <p className="home-card-body">
+              Every hackathon win, paper publication, internship and workshop is logged
+              in the Activity Logger — verified, timestamped, and tied to the student who
+              did the work. A public leaderboard tracks department-wide standings.
+            </p>
+          </div>
+          <div className="home-card">
+            <div className="home-card-num">03</div>
+            <div className="home-card-title">Connect with industry</div>
+            <p className="home-card-body">
+              SAIT works with the placement cell to bring recruiters to campus, organise
+              mock interviews, publish placement statistics, and maintain a directory of
+              alumni willing to refer and mentor current students.
+            </p>
+          </div>
+          <div className="home-card">
+            <div className="home-card-num">04</div>
+            <div className="home-card-title">Publish the department's voice</div>
+            <p className="home-card-body">
+              Notices, deadlines, announcements, the annual department journal, and
+              short-form updates from the executive committee — all in one place,
+              written by students, for students.
+            </p>
+          </div>
+        </div>
+      </Section>
+
+      <Section
+        id="home-notices"
+        num="03"
+        kicker="Latest"
+        title="Recent notices."
+      >
+        <div className="row-list">
+          {NOTIFICATIONS.slice(0, 4).map((n) => (
+            <div className="row" key={n.title}>
+              <span className="row-date">{n.date}</span>
+              <div>
+                <div className="row-title">{n.title}</div>
+                <div className="row-meta" style={{ marginTop: 6 }}>{n.body.slice(0, 120)}…</div>
+              </div>
+              <span className="row-meta">
+                <ArrowLink onClick={() => onNavigate('notifications')}>Read</ArrowLink>
+              </span>
+            </div>
+          ))}
+        </div>
+        <div style={{ marginTop: 24 }}>
+          <ArrowLink onClick={() => onNavigate('notifications')}>All notices →</ArrowLink>
+        </div>
+      </Section>
+
+      <Section
+        id="home-events"
+        num="04"
+        kicker="Coming up"
+        title="Next on the calendar."
+      >
+        <div className="row-list">
+          {UPCOMING_EVENTS.slice(0, 3).map((e) => (
+            <div className="row" key={e.title}>
+              <span className="row-date">{e.date}</span>
+              <div>
+                <div className="row-title">{e.title}</div>
+                <div className="row-meta" style={{ marginTop: 6 }}>{e.venue} · {e.time}</div>
+              </div>
+              <span className="row-meta">
+                <span className="tag accent">{e.category}</span>
+              </span>
+            </div>
+          ))}
+        </div>
+        <div style={{ marginTop: 24 }}>
+          <ArrowLink onClick={() => onNavigate('events')}>See all events →</ArrowLink>
+        </div>
+      </Section>
+
+      <Section
+        id="why"
+        num="05"
+        kicker="Why SAIT"
+        title="What the association is actually for."
+      >
+        <div className="cols">
+          <div>
+            <SubHead>For first years</SubHead>
+            <p className="muted">
+              SAIT is where you find out what the department is really about — beyond
+              the syllabus. Your first hackathon, your first Git workshop, your first
+              time presenting something you built. The people who run these events
+              were first years twelve months ago.
+            </p>
+          </div>
+          <div>
+            <SubHead>For second and third years</SubHead>
+            <p className="muted">
+              This is where you build a public record. Every activity you log is
+              evidence — for placements, for higher studies, for internships. The
+              leaderboard isn't a competition; it's a running list of who has been
+              doing the work, visible to faculty and recruiters.
+            </p>
+          </div>
+          <div>
+            <SubHead>For alumni</SubHead>
+            <p className="muted">
+              The alumni network page is the beginning of a longer directory. If you
+              would like to mentor current students, speak at a TechTalk, or list
+              your company as a recruiter, write to the association.
+            </p>
+          </div>
+          <div>
+            <SubHead>For the department</SubHead>
+            <p className="muted">
+              SAIT maintains the historical record that the department office does not
+              have bandwidth for — who won what, when, and against whom. It exists to
+              make the division's students visible.
+            </p>
+          </div>
+        </div>
+      </Section>
     </>
   )
 }
@@ -105,74 +246,209 @@ const RESOURCES = [
   { title: 'Scholarship and fee notifications', note: 'State and central scholarship schemes, deadlines, and required documents.' },
 ]
 
+const FACILITIES = [
+  { name: 'Computing Labs', detail: 'Three labs with 120+ workstations, running Linux and Windows. Available for project use outside class hours.' },
+  { name: 'GPU Server', detail: 'Shared access to a GPU node for machine learning and computer vision coursework and projects.' },
+  { name: 'Division Library', detail: 'Reference collection focused on systems, networks, algorithms and software engineering. Open 09:30–16:30 on working days.' },
+  { name: 'Seminar Hall', detail: '100-seat hall used for TechTalks, workshops, and student presentations.' },
+  { name: 'Project Rooms', detail: 'Shared workspace for final-year project teams during their project semesters.' },
+  { name: 'High-speed Network', detail: 'Campus-wide fibre backbone. Wi-Fi available across the IT block and library.' },
+]
+
+const TIMELINE = [
+  { year: '2001', event: 'Division of Information Technology established within SOE, CUSAT.' },
+  { year: '2003', event: 'First B.Tech IT batch graduates. Department grows to four faculty members.' },
+  { year: '2008', event: 'Formal student body formed — coordinating committee for department events.' },
+  { year: '2012', event: 'First HackIT. Twenty-two students across four teams participate.' },
+  { year: '2015', event: 'SAIT given official recognition as the division\'s student association.' },
+  { year: '2018', event: 'Launch of InnoVIT project expo. Alumni network formally established.' },
+  { year: '2021', event: 'First fully online HackIT during the pandemic. 82 teams from Kerala participate.' },
+  { year: '2024', event: 'Alumni mentorship program begins. Placement cell and SAIT formalise collaboration.' },
+  { year: '2026', event: 'Activity Logger goes live. Open record of department achievements.' },
+]
+
+const CURRICULUM = [
+  { semester: '1–2', focus: 'Foundations', detail: 'Programming in C, Discrete Mathematics, Digital Systems, Data Structures, basic electronics and communication.' },
+  { semester: '3–4', focus: 'Core systems', detail: 'Operating Systems, Computer Networks, Database Systems, Object-Oriented Programming, Automata Theory, Design & Analysis of Algorithms.' },
+  { semester: '5–6', focus: 'Applied computing', detail: 'Software Engineering, Web Technologies, Machine Learning, Computer Graphics, Compiler Design, elective streams begin.' },
+  { semester: '7–8', focus: 'Specialisation & project', detail: 'Electives across systems, AI, security, and cloud. Two-semester capstone project and internship.' },
+]
+
 export function About() {
   const [open, setOpen] = useState(0)
+  const [tab, setTab] = useState('overview')
+
   return (
     <Section id="about" num="02" kicker="About" title="The department and the association."
-      lede="The Division of Information Technology was established within the School of Engineering to build strong foundations in computing, systems and software. SAIT is its student body.">
-      <div className="cols">
-        <div>
-          <SubHead>Vision</SubHead>
-          <p className="muted">To be a division known for students who build — technically rigorous, professionally prepared, and useful to the communities they go on to serve.</p>
-        </div>
-        <div>
-          <SubHead>Mission</SubHead>
-          <ul className="muted" style={{ paddingLeft: 18, margin: 0, lineHeight: 1.8 }}>
-            <li>Run a consistent calendar of technical and cultural events.</li>
-            <li>Maintain an open record of student activity and achievement.</li>
-            <li>Support placement preparation through structured resources.</li>
-            <li>Keep the alumni network connected to the department.</li>
-          </ul>
-        </div>
+      lede="The Division of Information Technology was established within the School of Engineering, CUSAT, to build strong foundations in computing, systems and software. SAIT is its student body.">
+
+      <div className="about-tabs" role="tablist">
+        <button role="tab" data-active={tab === 'overview'} onClick={() => setTab('overview')}>
+          Overview
+        </button>
+        <button role="tab" data-active={tab === 'facilities'} onClick={() => setTab('facilities')}>
+          Facilities
+        </button>
+        <button role="tab" data-active={tab === 'curriculum'} onClick={() => setTab('curriculum')}>
+          Curriculum
+        </button>
+        <button role="tab" data-active={tab === 'history'} onClick={() => setTab('history')}>
+          History
+        </button>
       </div>
 
-      <div style={{ marginTop: 56 }}>
-        <SubHead>Brief history</SubHead>
-        <p className="muted" style={{ maxWidth: '68ch' }}>
-          The IT Division at SOE, CUSAT has run an undergraduate programme in Information Technology for over two decades. SAIT was formed by the students of the division as a coordinating body for events, industry interaction and department publications. It has since grown into an elected committee with dedicated sub-teams for technology, media, events, public relations and content.
-        </p>
-      </div>
+      {tab === 'overview' && (
+        <>
+          <div className="cols">
+            <div>
+              <SubHead>Vision</SubHead>
+              <p className="muted">
+                To be a division known for students who build — technically rigorous,
+                professionally prepared, and useful to the communities they go on to
+                serve.
+              </p>
+            </div>
+            <div>
+              <SubHead>Mission</SubHead>
+              <ul className="muted" style={{ paddingLeft: 18, margin: 0, lineHeight: 1.8 }}>
+                <li>Run a consistent calendar of technical and cultural events.</li>
+                <li>Maintain an open record of student activity and achievement.</li>
+                <li>Support placement preparation through structured resources.</li>
+                <li>Keep the alumni network connected to the department.</li>
+                <li>Publish honest, useful information in one place.</li>
+              </ul>
+            </div>
+          </div>
 
-      <div style={{ marginTop: 56 }}>
-        <SubHead>Faculty and administration</SubHead>
-        <div className="people-grid">
-          {FACULTY.map((f) => (
-            <div className="person" key={f.name}>
-              <Initials name={f.name} />
-              <div>
-                <div className="p-name">{f.name}</div>
-                <div className="p-role">{f.role}</div>
+          <div style={{ marginTop: 56 }}>
+            <SubHead>The department</SubHead>
+            <p className="muted" style={{ maxWidth: '72ch' }}>
+              The Division of Information Technology sits within the School of Engineering
+              at Cochin University of Science and Technology. It offers a four-year
+              B.Tech programme in Information Technology, admitting 60 students per year
+              through the Kerala state engineering entrance. The division has graduated
+              over two thousand engineers since its first batch in 2003.
+            </p>
+            <p className="muted" style={{ maxWidth: '72ch', marginTop: 16 }}>
+              The department's research spans systems, distributed computing, machine
+              learning, information security and data engineering. Faculty publish
+              regularly and supervise both undergraduate capstone projects and PhD
+              candidates under the university's research programmes.
+            </p>
+          </div>
+
+          <div style={{ marginTop: 56 }}>
+            <SubHead>The association</SubHead>
+            <p className="muted" style={{ maxWidth: '72ch' }}>
+              SAIT — the Students Association of Information Technology — is the elected
+              student body of the division. It exists for three purposes: to run the
+              events calendar, to maintain the historical record of what the division's
+              students achieve, and to act as a bridge between students, faculty,
+              alumni, and industry.
+            </p>
+            <p className="muted" style={{ maxWidth: '72ch', marginTop: 16 }}>
+              The association is led by an elected executive committee, supported by
+              five sub-teams (Tech, Media, Events, PR, Content), and advised by a staff
+              coordinator. Elections happen annually at the start of the academic year.
+            </p>
+          </div>
+
+          <div style={{ marginTop: 56 }}>
+            <SubHead>Faculty and administration</SubHead>
+            <div className="people-grid">
+              {FACULTY.map((f) => (
+                <div className="person" key={f.name}>
+                  <Initials name={f.name} />
+                  <div>
+                    <div className="p-name">{f.name}</div>
+                    <div className="p-role">{f.role}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div style={{ marginTop: 56 }}>
+            <SubHead>Academic resources</SubHead>
+            <div>
+              {RESOURCES.map((r, i) => {
+                const isOpen = open === i
+                return (
+                  <div className="acc-item" key={r.title} data-open={isOpen}>
+                    <button className="acc-head" onClick={() => setOpen(isOpen ? -1 : i)} aria-expanded={isOpen}>
+                      <div>
+                        <div className="acc-title">{r.title}</div>
+                        <div className="acc-date" style={{ marginTop: 4 }}>Resource</div>
+                      </div>
+                      <span className="acc-plus" aria-hidden="true">+</span>
+                    </button>
+                    {isOpen && (
+                      <div className="acc-body">
+                        {r.note}
+                        <div style={{ marginTop: 14 }}><ArrowLink>Open resource</ArrowLink></div>
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        </>
+      )}
+
+      {tab === 'facilities' && (
+        <>
+          <p className="muted" style={{ maxWidth: '72ch', marginBottom: 32 }}>
+            The IT Division occupies its own block within the School of Engineering,
+            with dedicated teaching labs, a seminar hall, project rooms and a small
+            reference library. All facilities are available to students of the division
+            during working hours.
+          </p>
+          <div className="home-grid-2">
+            {FACILITIES.map((f) => (
+              <div className="home-card" key={f.name}>
+                <div className="home-card-title">{f.name}</div>
+                <p className="home-card-body">{f.detail}</p>
               </div>
+            ))}
+          </div>
+        </>
+      )}
+
+      {tab === 'curriculum' && (
+        <>
+          <p className="muted" style={{ maxWidth: '72ch', marginBottom: 32 }}>
+            The B.Tech IT programme runs over eight semesters and follows the 2022
+            scheme. The first two years build mathematical and systems foundations;
+            the last two shift into specialisation, electives, and a two-semester
+            capstone project.
+          </p>
+          <div className="row-list">
+            {CURRICULUM.map((c) => (
+              <div className="row" key={c.semester}>
+                <span className="row-date">Sem {c.semester}</span>
+                <div>
+                  <div className="row-title">{c.focus}</div>
+                  <div className="row-meta" style={{ marginTop: 8 }}>{c.detail}</div>
+                </div>
+                <span className="row-meta" />
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+
+      {tab === 'history' && (
+        <div className="timeline">
+          {TIMELINE.map((t) => (
+            <div className="timeline-item" key={t.year}>
+              <div className="timeline-year">{t.year}</div>
+              <div className="timeline-dot" aria-hidden="true" />
+              <div className="timeline-body">{t.event}</div>
             </div>
           ))}
         </div>
-      </div>
-
-      <div style={{ marginTop: 56 }}>
-        <SubHead>Academic resources</SubHead>
-        <div>
-          {RESOURCES.map((r, i) => {
-            const isOpen = open === i
-            return (
-              <div className="acc-item" key={r.title} data-open={isOpen}>
-                <button className="acc-head" onClick={() => setOpen(isOpen ? -1 : i)} aria-expanded={isOpen}>
-                  <div>
-                    <div className="acc-title">{r.title}</div>
-                    <div className="acc-date" style={{ marginTop: 4 }}>Resource</div>
-                  </div>
-                  <span className="acc-plus" aria-hidden="true">+</span>
-                </button>
-                {isOpen && (
-                  <div className="acc-body">
-                    {r.note}
-                    <div style={{ marginTop: 14 }}><ArrowLink>Open resource</ArrowLink></div>
-                  </div>
-                )}
-              </div>
-            )
-          })}
-        </div>
-      </div>
+      )}
     </Section>
   )
 }
