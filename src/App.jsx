@@ -11,20 +11,44 @@ import CommandPalette from './CommandPalette.jsx'
 import { ThemeProvider, ScrollProgress, FloatingDock, useCounters } from './panel.jsx'
 import {
   CursorGlow, Spotlight, ScrollTop,
-  useScrollReveal, useTilt, Grain, Splash,
+  useScrollReveal, useTilt, Grain, Splash, PageFade,
 } from './fancy.jsx'
+import { AuthProvider, AuthModal, UserMenu } from './auth.jsx'
 
 function Shell() {
   const [page, setPage] = useState('home')
   const [menuOpen, setMenuOpen] = useState(false)
   const [paletteOpen, setPaletteOpen] = useState(false)
   const [helpOpen, setHelpOpen] = useState(false)
+  const [authOpen, setAuthOpen] = useState(false)
+  const [authMode, setAuthMode] = useState('login')
   const [readNotices] = useLocalStorage('sait.notices.read', [])
   const [gPending, setGPending] = useState(false)
 
   useCounters(page)
   useScrollReveal([page])
   useTilt()
+
+  // Global ripple effect on buttons
+  useEffect(() => {
+    const onClick = (e) => {
+      const btn = e.target.closest('.btn, .nav-auth-btn, .dock-trigger, .filters button, .view-toggle button, .chip')
+      if (!btn) return
+      const rect = btn.getBoundingClientRect()
+      const size = Math.max(rect.width, rect.height)
+      const x = e.clientX - rect.left - size / 2
+      const y = e.clientY - rect.top - size / 2
+      const span = document.createElement('span')
+      span.className = 'ripple'
+      span.style.width = span.style.height = size + 'px'
+      span.style.left = x + 'px'
+      span.style.top = y + 'px'
+      btn.appendChild(span)
+      setTimeout(() => span.remove(), 700)
+    }
+    document.addEventListener('click', onClick)
+    return () => document.removeEventListener('click', onClick)
+  }, [])
 
   const unreadNotices = Math.max(0, 4 - readNotices.length)
 
@@ -44,6 +68,11 @@ function Shell() {
     setMenuOpen(false)
     window.location.hash = id
     window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  function openAuth(mode = 'login') {
+    setAuthMode(mode)
+    setAuthOpen(true)
   }
 
   const commands = useMemo(() => {
@@ -79,6 +108,7 @@ function Shell() {
     }))
 
     list.push({ id: 'action-logs', group: 'Actions', label: 'Open activity logger', hint: 'Action', run: () => navigate('logger') })
+    list.push({ id: 'action-signin', group: 'Actions', label: 'Sign in / Create account', hint: 'Auth', run: () => openAuth('login') })
     list.push({ id: 'action-help', group: 'Actions', label: 'Show keyboard shortcuts', hint: '?', run: () => setHelpOpen(true) })
     return list
   }, [])
@@ -157,6 +187,7 @@ function Shell() {
               <span>Search</span>
               <span className="palette-keys"><Kbd>Ctrl</Kbd><Kbd>K</Kbd></span>
             </button>
+            <UserMenu onOpenAuth={() => openAuth('login')} />
             <button className="nav-toggle" onClick={() => setMenuOpen((o) => !o)} aria-expanded={menuOpen}>
               {menuOpen ? 'Close' : 'Menu'}
             </button>
@@ -167,24 +198,27 @@ function Shell() {
             {[...allNav, { id: 'notifications', label: 'Notices' }].map((n) => (
               <button key={n.id} data-active={page === n.id} onClick={() => navigate(n.id)}>{n.label}</button>
             ))}
+            <button onClick={() => { setMenuOpen(false); openAuth('login') }}>Sign in / Sign up</button>
           </div>
         )}
       </header>
 
       <main>
-        {page === 'home' && <Home onNavigate={navigate} onOpenPalette={() => setPaletteOpen(true)} />}
-        {page === 'about' && <About />}
-        {page === 'people' && <People />}
-        {page === 'events' && <Events />}
-        {page === 'placements' && <Placements />}
-        {page === 'alumni' && <Alumni />}
-        {page === 'achievements' && <Achievements />}
-        {page === 'gallery' && <Gallery />}
-        {page === 'blog' && <Blog />}
-        {page === 'logger' && <ActivityLogger />}
-        {page === 'faq' && <FAQ />}
-        {page === 'contact' && <Contact />}
-        {page === 'notifications' && <Notifications />}
+        <PageFade pageKey={page}>
+          {page === 'home' && <Home onNavigate={navigate} onOpenPalette={() => setPaletteOpen(true)} onOpenAuth={() => openAuth('signup')} />}
+          {page === 'about' && <About />}
+          {page === 'people' && <People />}
+          {page === 'events' && <Events />}
+          {page === 'placements' && <Placements />}
+          {page === 'alumni' && <Alumni />}
+          {page === 'achievements' && <Achievements />}
+          {page === 'gallery' && <Gallery />}
+          {page === 'blog' && <Blog />}
+          {page === 'logger' && <ActivityLogger onOpenAuth={() => openAuth('login')} />}
+          {page === 'faq' && <FAQ />}
+          {page === 'contact' && <Contact />}
+          {page === 'notifications' && <Notifications />}
+        </PageFade>
       </main>
 
       <footer className="footer">
@@ -246,6 +280,7 @@ function Shell() {
       <ScrollTop />
       <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} commands={commands} />
       <ShortcutHelp open={helpOpen} onClose={() => setHelpOpen(false)} items={shortcuts} />
+      <AuthModal open={authOpen} onClose={() => setAuthOpen(false)} initialMode={authMode} />
     </>
   )
 }
@@ -253,9 +288,11 @@ function Shell() {
 export default function App() {
   return (
     <ThemeProvider>
-      <ToastProvider>
-        <Shell />
-      </ToastProvider>
+      <AuthProvider>
+        <ToastProvider>
+          <Shell />
+        </ToastProvider>
+      </AuthProvider>
     </ThemeProvider>
   )
 }

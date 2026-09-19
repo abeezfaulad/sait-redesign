@@ -2,7 +2,8 @@ import React, { useMemo, useState } from 'react'
 import { Section, ArrowLink, Initials, SubHead, Drawer, SearchInput, Empty, Kbd, useToast } from './ui.jsx'
 import { useLocalStorage, useQueryParam } from './hooks.js'
 import { useEventCountdown, RegistrationModal } from './extras.jsx'
-import { Constellation, Marquee } from './fancy.jsx'
+import { Constellation, Marquee, Typewriter, MagneticButton, Parallax } from './fancy.jsx'
+import { useAuth } from './auth.jsx'
 import {
   STATS, QUICK_LINKS, FACULTY, EXEC, TEAMS,
   EVENT_CATEGORIES, UPCOMING_EVENTS, PAST_EVENTS,
@@ -12,12 +13,18 @@ import {
   NOTIFICATIONS,
 } from './data.js'
 
-export function Home({ onNavigate, onOpenPalette }) {
+/* ============================================================
+   HOME
+   ============================================================ */
+export function Home({ onNavigate, onOpenPalette, onOpenAuth }) {
   return (
     <>
       <section className="hero" id="home">
         <div className="hero-bg" aria-hidden="true">
           <div className="hero-grid" />
+          <Parallax speed={0.08} className="hero-glow">
+            <div className="hero-glow-orb" />
+          </Parallax>
         </div>
         <Constellation />
         <div className="container hero-inner">
@@ -28,7 +35,14 @@ export function Home({ onNavigate, onOpenPalette }) {
           <h1 className="display-xl">
             Students<br />
             Association of<br />
-            <em>Information Technology</em>
+            <em>
+              <Typewriter phrases={[
+                'Information Technology',
+                'builders & researchers',
+                'the IT Division',
+                'SAIT · CUSAT',
+              ]} />
+            </em>
           </h1>
           <p className="lede">
             SAIT represents the students of the IT Division at CUSAT — running
@@ -36,8 +50,12 @@ export function Home({ onNavigate, onOpenPalette }) {
             keeping a record of what this department's students build.
           </p>
           <div className="hero-actions">
-            <button className="btn" onClick={() => onNavigate('events')}>Upcoming events <span aria-hidden="true">→</span></button>
-            <button className="btn ghost" onClick={() => onNavigate('logger')}>Open activity logger</button>
+            <MagneticButton className="btn" onClick={() => onNavigate('events')}>
+              Upcoming events <span aria-hidden="true">→</span>
+            </MagneticButton>
+            <MagneticButton className="btn ghost" onClick={onOpenAuth}>
+              Create account
+            </MagneticButton>
             <button className="btn ghost" onClick={onOpenPalette}>
               <span>Search</span> <Kbd>Ctrl</Kbd><Kbd>K</Kbd>
             </button>
@@ -76,6 +94,9 @@ export function Home({ onNavigate, onOpenPalette }) {
   )
 }
 
+/* ============================================================
+   ABOUT
+   ============================================================ */
 const RESOURCES = [
   { title: 'B.Tech IT curriculum — 2022 scheme', note: 'Full course structure, credits, and electives for all eight semesters.' },
   { title: 'Academic calendar, Odd Semester 2026', note: 'Term dates, holidays, internal exam windows, and result publication dates.' },
@@ -156,6 +177,9 @@ export function About() {
   )
 }
 
+/* ============================================================
+   PEOPLE
+   ============================================================ */
 export function People() {
   const [q, setQ] = useState('')
   const needle = q.trim().toLowerCase()
@@ -220,6 +244,9 @@ export function People() {
   )
 }
 
+/* ============================================================
+   EVENTS
+   ============================================================ */
 function eventDateParts(d) {
   const m = d.match(/(\d+)\s+([A-Za-z]+)\s+(\d+)/)
   if (!m) return null
@@ -439,6 +466,9 @@ function EventDetail({ event, onRegister }) {
   )
 }
 
+/* ============================================================
+   PLACEMENTS
+   ============================================================ */
 export function Placements() {
   const toast = useToast()
   return (
@@ -475,6 +505,9 @@ export function Placements() {
   )
 }
 
+/* ============================================================
+   ALUMNI
+   ============================================================ */
 export function Alumni() {
   const [q, setQ] = useState('')
   const [year, setYear] = useState('All')
@@ -524,6 +557,9 @@ export function Alumni() {
   )
 }
 
+/* ============================================================
+   ACHIEVEMENTS
+   ============================================================ */
 export function Achievements() {
   const [q, setQ] = useState('')
   const filtered = useMemo(() => {
@@ -564,8 +600,12 @@ export function Achievements() {
   )
 }
 
-export function ActivityLogger() {
+/* ============================================================
+   ACTIVITY LOGGER
+   ============================================================ */
+export function ActivityLogger({ onOpenAuth }) {
   const toast = useToast()
+  const { user } = useAuth()
   const [activities, setActivities] = useLocalStorage('sait.activities', SEED_ACTIVITIES)
   const [typeFilter, setTypeFilter] = useState('All')
   const [editingId, setEditingId] = useState(null)
@@ -588,6 +628,7 @@ export function ActivityLogger() {
 
   function submit(e) {
     e.preventDefault()
+    if (!user) { onOpenAuth && onOpenAuth(); return }
     if (!form.title || !form.date || !form.role) return
     const points = ACTIVITY_TYPES.find((t) => t.id === form.type)?.points ?? 10
     if (editingId != null) {
@@ -596,7 +637,7 @@ export function ActivityLogger() {
       reset()
       return
     }
-    setActivities((prev) => [{ id: Date.now(), ...form, status: 'pending', points, who: 'You' }, ...prev])
+    setActivities((prev) => [{ id: Date.now(), ...form, status: 'pending', points, who: user.name }, ...prev])
     toast.push({ title: 'Submitted for verification', body: `${form.title} · ${typeLabel(form.type)}` })
     reset()
   }
@@ -635,6 +676,20 @@ export function ActivityLogger() {
   return (
     <Section id="logger" num="08" kicker="Student activity logger" title="Record what you do outside class."
       lede="Submit hackathons, workshops, publications, internships and other activities. Verified entries appear on your profile and count towards the department leaderboard.">
+
+      {!user && (
+        <div className="auth-required">
+          <div className="auth-required-inner">
+            <div className="auth-required-icon" aria-hidden="true">🔒</div>
+            <div>
+              <div className="auth-required-title">Sign in to log activities</div>
+              <div className="auth-required-sub">Your activity history, points and leaderboard rank are tied to your account.</div>
+            </div>
+            <button className="btn" onClick={onOpenAuth}>Sign in</button>
+          </div>
+        </div>
+      )}
+
       <div className="cols wide-left">
         <div>
           <SubHead action={editingId && (<button className="inline-cancel" onClick={reset}>Cancel edit</button>)}>
@@ -699,7 +754,7 @@ export function ActivityLogger() {
                 <div className="fi-meta">{a.date} · {typeLabel(a.type)} · {a.role} · +{a.points} pts</div>
                 <div className="fi-bottom">
                   <span className="fi-meta" style={{ color: 'var(--text-3)' }}>Submitted by {a.who}</span>
-                  {a.who === 'You' && (
+                  {user && a.who === user.name && (
                     <span className="fi-actions">
                       <button onClick={() => edit(a)}>Edit</button>
                       <button onClick={() => remove(a)} className="danger">Delete</button>
@@ -763,6 +818,9 @@ function Leaderboard() {
   )
 }
 
+/* ============================================================
+   NOTIFICATIONS
+   ============================================================ */
 export function Notifications() {
   const [open, setOpen] = useState(0)
   const [read, setRead] = useLocalStorage('sait.notices.read', [])

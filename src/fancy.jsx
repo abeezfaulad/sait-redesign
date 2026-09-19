@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState, useCallback } from 'react'
 import { useReducedMotion } from './hooks.js'
 
 export function CursorGlow() {
@@ -238,5 +238,213 @@ export function ScrollTop() {
       <span aria-hidden="true">↑</span>
       <span className="scroll-top-label">Top</span>
     </button>
+  )
+  
+}
+/* ============================================================
+   Typewriter — cycles through phrases with a blinking caret
+   ============================================================ */
+export function Typewriter({ phrases, speed = 55, pause = 1800, className = '' }) {
+  const [i, setI] = useState(0)
+  const [text, setText] = useState('')
+  const [deleting, setDeleting] = useState(false)
+
+  useEffect(() => {
+    const current = phrases[i % phrases.length]
+    let t
+    if (!deleting && text === current) {
+      t = setTimeout(() => setDeleting(true), pause)
+    } else if (deleting && text === '') {
+      setDeleting(false)
+      setI((x) => (x + 1) % phrases.length)
+    } else {
+      t = setTimeout(() => {
+        setText(deleting
+          ? current.slice(0, text.length - 1)
+          : current.slice(0, text.length + 1))
+      }, deleting ? speed / 2 : speed)
+    }
+    return () => clearTimeout(t)
+  }, [text, deleting, i, phrases, speed, pause])
+
+  return (
+    <span className={className}>
+      {text}
+      <span className="typewriter-caret" aria-hidden="true">|</span>
+    </span>
+  )
+}
+
+/* ============================================================
+   ScrambleText — hovers scramble letters then resolve
+   ============================================================ */
+export function ScrambleText({ children, className = '' }) {
+  const [display, setDisplay] = useState(children)
+  const chars = '!<>-_\\/[]{}—=+*^?#01'
+
+  function scramble() {
+    let iter = 0
+    const original = children
+    const id = setInterval(() => {
+      setDisplay(
+        original.split('').map((_, i) => {
+          if (i < iter) return original[i]
+          return chars[Math.floor(Math.random() * chars.length)]
+        }).join('')
+      )
+      iter += 1 / 2
+      if (iter >= original.length) {
+        clearInterval(id)
+        setDisplay(original)
+      }
+    }, 32)
+  }
+
+  return (
+    <span className={className} onMouseEnter={scramble} style={{ display: 'inline-block' }}>
+      {display}
+    </span>
+  )
+}
+
+/* ============================================================
+   MagneticButton — follows pointer slightly
+   ============================================================ */
+export function MagneticButton({ children, className = '', strength = 0.35, ...rest }) {
+  const ref = useRef(null)
+
+  useEffect(() => {
+    if (window.matchMedia('(hover: none)').matches) return
+    const el = ref.current
+    if (!el) return
+    let raf = 0, tx = 0, ty = 0, cx = 0, cy = 0
+    const onMove = (e) => {
+      const r = el.getBoundingClientRect()
+      const px = e.clientX - (r.left + r.width / 2)
+      const py = e.clientY - (r.top + r.height / 2)
+      tx = px * strength
+      ty = py * strength
+      if (!raf) raf = requestAnimationFrame(tick)
+    }
+    const onLeave = () => { tx = 0; ty = 0; if (!raf) raf = requestAnimationFrame(tick) }
+    const tick = () => {
+      cx += (tx - cx) * 0.2
+      cy += (ty - cy) * 0.2
+      el.style.transform = `translate(${cx}px, ${cy}px)`
+      if (Math.abs(tx - cx) > 0.2 || Math.abs(ty - cy) > 0.2) raf = requestAnimationFrame(tick)
+      else raf = 0
+    }
+    el.addEventListener('mousemove', onMove)
+    el.addEventListener('mouseleave', onLeave)
+    return () => {
+      el.removeEventListener('mousemove', onMove)
+      el.removeEventListener('mouseleave', onLeave)
+      if (raf) cancelAnimationFrame(raf)
+    }
+  }, [strength])
+
+  return (
+    <button ref={ref} className={`magnetic ${className}`} {...rest}>
+      <span className="magnetic-inner">{children}</span>
+    </button>
+  )
+}
+
+/* ============================================================
+   Ripple — attach onClick ripple to any element
+   ============================================================ */
+export function useRipple() {
+  return useCallback((e) => {
+    const el = e.currentTarget
+    const rect = el.getBoundingClientRect()
+    const size = Math.max(rect.width, rect.height)
+    const x = e.clientX - rect.left - size / 2
+    const y = e.clientY - rect.top - size / 2
+    const ripple = document.createElement('span')
+    ripple.className = 'ripple'
+    ripple.style.width = ripple.style.height = size + 'px'
+    ripple.style.left = x + 'px'
+    ripple.style.top = y + 'px'
+    el.appendChild(ripple)
+    setTimeout(() => ripple.remove(), 700)
+  }, [])
+}
+
+/* ============================================================
+   Parallax — moves children based on scroll
+   ============================================================ */
+export function Parallax({ children, speed = 0.15, className = '' }) {
+  const ref = useRef(null)
+  const reduced = useReducedMotion()
+  useEffect(() => {
+    if (reduced) return
+    const el = ref.current
+    if (!el) return
+    let raf = 0
+    const onScroll = () => {
+      if (raf) return
+      raf = requestAnimationFrame(() => {
+        raf = 0
+        const r = el.getBoundingClientRect()
+        const vh = window.innerHeight
+        const centre = r.top + r.height / 2
+        const offset = (centre - vh / 2) * -speed
+        el.style.transform = `translate3d(0, ${offset}px, 0)`
+      })
+    }
+    onScroll()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    window.addEventListener('resize', onScroll)
+    return () => {
+      window.removeEventListener('scroll', onScroll)
+      window.removeEventListener('resize', onScroll)
+      if (raf) cancelAnimationFrame(raf)
+    }
+  }, [speed, reduced])
+  return <div ref={ref} className={className}>{children}</div>
+}
+
+/* ============================================================
+   Confetti — burst on success
+   ============================================================ */
+export function useConfetti() {
+  return useCallback((count = 40) => {
+    const container = document.createElement('div')
+    container.className = 'confetti-layer'
+    document.body.appendChild(container)
+    const colors = ['#F0A500', '#D97706', '#22C55E', '#7C7CF0', '#F26457']
+    for (let i = 0; i < count; i++) {
+      const piece = document.createElement('span')
+      piece.className = 'confetti-piece'
+      piece.style.left = Math.random() * 100 + '%'
+      piece.style.background = colors[Math.floor(Math.random() * colors.length)]
+      piece.style.animationDelay = Math.random() * 0.3 + 's'
+      piece.style.animationDuration = 1.4 + Math.random() * 0.8 + 's'
+      piece.style.transform = `rotate(${Math.random() * 360}deg)`
+      container.appendChild(piece)
+    }
+    setTimeout(() => container.remove(), 2600)
+  }, [])
+}
+
+/* ============================================================
+   Page transition wrapper
+   ============================================================ */
+export function PageFade({ children, pageKey }) {
+  const [key, setKey] = useState(pageKey)
+  const [show, setShow] = useState(true)
+  useEffect(() => {
+    if (pageKey === key) return
+    setShow(false)
+    const t = setTimeout(() => {
+      setKey(pageKey)
+      setShow(true)
+    }, 140)
+    return () => clearTimeout(t)
+  }, [pageKey, key])
+  return (
+    <div className={`page-fade ${show ? 'in' : ''}`} key={key}>
+      {children}
+    </div>
   )
 }
